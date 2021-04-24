@@ -1,10 +1,20 @@
 #include "../include/memoryManager.h"
 
 #define BLOCK_SIZE sizeof(node)
-
+#define BLOCK_AMOUNT (baseSize / BLOCK_SIZE)
+static int baseSize;
 static Node *base;
 static Node *freep = NULL; // Inicio de una lista libre
 
+/*Inicializa el sector de la memoria del heap indicando lugar y tamanio*/
+void initializeMem(void *baseAllocation, uint32_t size)
+{
+    base = (Node *)baseAllocation;
+    baseSize = size;
+    freep = base;
+    freep->s.ptr = freep;
+    freep->s.size = BLOCK_AMOUNT;
+}
 /* Asignador de memoria con el algoritmo FIRST-FIT */
 void *mallocFF(uint32_t size)
 {
@@ -14,25 +24,25 @@ void *mallocFF(uint32_t size)
     Node *p;
     Node *prevp = freep;
     uint32_t nunits = (size + sizeof(Node) - 1) / sizeof(Node) + 1;
-    if (prevp == NULL)
-    {
-        // Se inicializa la lista nueva.
-        prevp = base;
-        freep = prevp;
-        base->s.ptr = freep;
-        base->s.size = 0;
-    }
+    // if (prevp == NULL)
+    // {
+    //     // Se inicializa la lista nueva.
+    //     prevp = base;
+    //     freep = prevp;
+    //     base->s.ptr = freep;
+    //     base->s.size = 0;
+    // }
     for (p = prevp->s.ptr;; prevp = p, p = p->s.ptr)
     {
-        if (p->s.size >= size)
+        if (p->s.size >= nunits)
         {
-            if (p->s.size == size)
+            if (p->s.size == nunits)
                 prevp->s.ptr = p->s.ptr;
             else
             {
-                p->s.size -= size;
+                p->s.size -= nunits;
                 p += p->s.size;
-                p->s.size = size;
+                p->s.size = nunits;
             }
             freep = prevp;
             return (void *)(p + 1);
