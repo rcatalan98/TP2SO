@@ -8,7 +8,8 @@ typedef struct
 } timerFunction;
 timerFunction timer = {0, 0};
 
-void timerHandler() {
+void timerHandler()
+{
 	ticks++;
 	if (timer.flag)
 	{
@@ -16,11 +17,13 @@ void timerHandler() {
 	}
 }
 
-int sTicksElapsed() {
+int sTicksElapsed()
+{
 	return ticks;
 }
 
-int secondsElapsed() {
+int secondsElapsed()
+{
 	return ticks / 18;
 }
 

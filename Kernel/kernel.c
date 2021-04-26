@@ -1,7 +1,7 @@
 /**
  *  kernel.c: Archivo original de barebones. Se limpia lo no utilizado de modo texto.
  */
-#include <lib.h>
+#include "./include/lib.h"
 #include <moduleLoader.h>
 #include <idtLoader.h>
 #include <naiveConsole.h>
@@ -10,6 +10,8 @@
 #include <videoDriver.h>
 #include <stdio.h>
 #include <exceptions.h>
+#include <memoryManager.h>
+#include <scheduler.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -22,7 +24,9 @@ static const uint64_t PageSize = 0x1000;
 
 static void *const sampleCodeModuleAddress = (void *)0x400000;
 static void *const sampleDataModuleAddress = (void *)0x500000;
+static void *const heapBaseAddress = (void *)0x600000;
 
+#define HEAP_SIZE (1024*1024*120)
 typedef int (*EntryPoint)();
 
 void clearBSS(void *bssAddress, uint64_t bssSize)
@@ -54,5 +58,7 @@ int main()
 {
 	load_idt();
 	initialStateSnapshot((uint64_t)sampleCodeModuleAddress, getSP());
+	initializeMem(heapBaseAddress, HEAP_SIZE);
+	initializeScheduler();
 	return ((EntryPoint)sampleCodeModuleAddress)();
 }

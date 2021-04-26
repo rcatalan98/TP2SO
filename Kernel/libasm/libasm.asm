@@ -1,6 +1,7 @@
 GLOBAL cpuVendor
 GLOBAL getRTC
 GLOBAL getSP
+GLOBAL forceTimer
 section .text
 	
 cpuVendor:
@@ -35,4 +36,8 @@ getRTC:
 	ret
 getSP:
 	mov rax, rsp
+	ret
+
+forceTimer:
+	int 20h
 	ret

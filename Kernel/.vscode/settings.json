@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "defs.h": "c",
+        "scheduler.h": "c",
+        "memorymanager.h": "c",
+        "stdio.h": "c",
+        "lib.h": "c",
+        "string.h": "c"
+    }
+}

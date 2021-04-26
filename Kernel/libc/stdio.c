@@ -1,7 +1,7 @@
 /**
  * stdio.c: Librería dedicada a la impresión y manejo de salida a pantalla.
 */
-#include <stdio.h>
+#include "../include/stdio.h"
 
 int height = HEIGHT / CHAR_HEIGHT, width = WIDTH / CHAR_WIDTH;
 int x = 0, y = (HEIGHT / CHAR_HEIGHT) - FONT_SIZE, blink = 0, cursorColor = GREEN;
