@@ -1,10 +1,14 @@
 /**
  *  sampleCodeModule.c: Archivo original de barebones modificado para poder correr shell.
  */
-#include <shell.h>
+#include "./include/shell.h"
 
 int main()
-{	
-	intializeShell();
-	return 0;                                                                                                                                                                                                                                                                                                                                                                           
+{
+	char *argv[] = {"Shell"};
+	int pid = _createProcess(&intializeShell, 1, argv);
+	printInt(pid);
+	//inforeg(getRegs());
+	//intializeShell();
+	return 0;
 }

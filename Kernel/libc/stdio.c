@@ -61,6 +61,13 @@ void print(char *string)
     sWrite(string, strlen(string), WHITE);
 }
 
+void printInt(int num)
+{
+    char buffer[40];
+    uintToBase(num, buffer, 10);
+    print(buffer);
+}
+
 void backspace()
 {
     if (x == 0 && y == 0)
@@ -92,3 +99,4 @@ void tab()
     }
     ((x += (4 * FONT_SIZE)) < width) ? setCursor(x, y, cursorColor) : enter();
 }
+

@@ -36,15 +36,21 @@ extern void _clearScreen();
 
 extern void _drawFigure(char *toDraw, int color, int size, int x, int y);
 
+extern uint64_t _createProcess(void (*fn)(int, char **), int argc, char **argv);
+
+extern void *_mallocFF(uint32_t size);
+
+void _freeFF(void *ap);
+
 extern void getRegs(int argcount, char *args[]);
 
 /**
  * Obtiene la cantidad de renglones en pantalla.
- */ 
+ */
 int getScreenHeight();
 /**
  * Obtiene la cantidad de posiciones de caracteres disponibles en pantalla.
- */ 
+ */
 int getScreenWidth();
 /**
  * Inicializa la estructura que ejecuta los programas del usuario.

@@ -5,6 +5,7 @@
         "memorymanager.h": "c",
         "stdio.h": "c",
         "lib.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "exceptions.h": "c"
     }
 }

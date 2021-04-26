@@ -1,7 +1,7 @@
 /**
  * shell.c: Intérprete de comandos de funciones de kernel.
 */
-#include <shell.h>
+#include "../include/shell.h"
 
 #define MAX_INPUT 30
 #define MAX_SIZE 10
@@ -110,7 +110,7 @@ int getScreenWidth()
 */
 void printUser()
 {
-    char s[] = "Clifford@TPE_ARQ:$ ";
+    char s[] = "User@TP2_SO:$ ";
     printWithColor(s, LIGHT_BLUE);
 }
 

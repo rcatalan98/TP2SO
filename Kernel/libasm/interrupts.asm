@@ -127,10 +127,9 @@ _irq00Handler:
 	mov rdi, 0 ; pasaje de parametro
 	call irqDispatcher
 
-	mov rdi,rsp; se carga el rsp para ejecutar el scheduler y luego se guarda de vuelta el rsp
+	mov rdi,rsp ; se carga el rsp para ejecutar el scheduler y luego se guarda de vuelta el rsp
 	call scheduler
 	mov rsp, rax
-
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h

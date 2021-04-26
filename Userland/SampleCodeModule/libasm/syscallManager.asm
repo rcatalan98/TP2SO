@@ -11,6 +11,9 @@ GLOBAL _clearScreen
 GLOBAL _timerFunc
 GLOBAL _getPixelHeight
 GLOBAL _getPixelWidth
+GLOBAL _mallocFF
+GLOBAL _createProcess
+GLOBAL _freeFF
 
 SECTION .text
 
@@ -82,3 +85,10 @@ _getPixelHeight:
 	syscall 7
 _getPixelWidth:
 	syscall 8
+
+_mallocFF:
+	syscall 9
+_freeFF:
+	syscall 10
+_createProcess:
+	syscall 11

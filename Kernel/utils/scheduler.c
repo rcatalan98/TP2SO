@@ -1,6 +1,9 @@
 #include "../include/scheduler.h"
-#define MAX_NAME 1024
-#define STACK_SIZE 1024
+#include "../include/stdio.h" // Para debugging.
+#define MAX_NAME 20
+#define STACK_SIZE 4 * 1024
+#define PROCESS_SIZE (8 * 1024 - sizeof(proccessNode)) // 8 KB
+
 typedef enum
 {
     READY,
@@ -51,29 +54,32 @@ typedef struct processList
     uint32_t nReady;
 } processList;
 
-static struct processList currentList;
+static struct processList *currentList;
+static processNode *currentProcess;
+static processNode *dummyProcess;
 static uint64_t pidCounter = 1;
-static uint64_t initializeProcess(pcb_t *process, char *name);
+
+static uint64_t initializeProcess(processNode *process, char *name);
 static void addProcess(struct processNode *nodeToAdd, struct processList *list);
 static struct processNode *removeProcess(struct processList *list);
 static int isEmpty(struct processList *list);
 static void exit();
 static void freeProcess(struct processNode *nodeToRemove);
 uint16_t changeState(uint64_t pid, states newState);
+struct processNode *getProcess(uint64_t pid);
 
-static void copyArguments(char ** d, char ** from, int amount){
-    for (int i = 0; i < amount; i++){
+static void copyArguments(char **d, char **from, int amount)
+{
+    for (int i = 0; i < amount; i++)
+    {
         d[i] = mallocFF(sizeof(char) * (strlen(from[i]) + 1));
         memcpy(d[i], from[i], strlen(from[i]));
     }
 }
 
-static processNode *currentProcess;
-static processNode *dummyProcess;
-
-static int dummyP(int argc, char ** argv)
+static int dummyP(int argc, char **argv)
 {
-    while(1)
+    while (1)
         _hlt();
     return 0;
 }
@@ -81,7 +87,7 @@ static int dummyP(int argc, char ** argv)
 /*
  * PID = 0 -> error.
  * PID > 1 -> proceso funcionando correctamente.
- */ 
+ */
 static uint64_t getNewPid()
 {
     return pidCounter++;
@@ -90,36 +96,39 @@ static uint64_t getNewPid()
 void initializeScheduler()
 {
     //Inicializamos la lista
-    currentList.first = NULL;
-    currentList.last = NULL;
-    currentList.nReady = 0;
-    currentList.size = 0;
-    
+    currentList = mallocFF(sizeof(processList));
+    currentList->first = NULL;
+    currentList->last = NULL;
+    currentList->nReady = 0;
+    currentList->size = 0;
+
     currentProcess = NULL;
-    //Agregamos como primer proceso el dummy
+    // Agregamos como primer proceso el dummy.
     char *argv[] = {"dummyProcess"};
-    createProcess((void *) &dummyP, 1, argv);
+    int pid = createProcess((void *)&dummyP, 1, argv);
+    dummyProcess = removeProcess(currentList);
 }
 
-static uint64_t switchContext(uint64_t rsp)
-{
-    if(currentProcess != NULL)
-    {
-        currentProcess->pcb.rsp = rsp;
-    }
-    return currentProcess->pcb.rsp;
-}
+// static uint64_t switchContext(uint64_t rsp)
+// {
+//     if (currentProcess != NULL)
+//     {
+//         currentProcess->pcb.rsp = rsp;
+//     }
+//     return currentProcess->pcb.rsp;
+// }
 
-static processNode *findNextReady(struct processList * list)
+static processNode *findNextReady(struct processList *list)
 {
     processNode *toReturn = removeProcess(list);
-    while(toReturn->pcb.state != READY)
+    while (toReturn->pcb.state != READY)
     {
-        if(toReturn->pcb.state == KILLED)
+        if (toReturn->pcb.state == KILLED)
         {
-            //hacemos el free del proceso.
+            // Hacemos el free del proceso.
             freeProcess(toReturn);
-        }else if(toReturn->pcb.state == BLOCKED)
+        }
+        else if (toReturn->pcb.state == BLOCKED)
             addProcess(toReturn, list);
         toReturn = removeProcess(list);
     }
@@ -128,50 +137,67 @@ static processNode *findNextReady(struct processList * list)
 
 uint64_t scheduler(uint64_t rsp)
 {
-    //Tengo que fijarme si hay algun proceso corriendo. Si no es asi debo elegir uno de la lista con estado READY.
-    //Si hay algun proceso debo hacer el switch context y chequear el tema del timeslot
-    if(currentProcess != NULL)
-    {
+    // Tengo que fijarme si hay algun proceso corriendo. Si no es asi debo elegir uno de la lista con estado READY.
+    // Si hay algun proceso debo hacer el switch context y chequear el tema del timeslot
+    // return rsp;
+    // if (currentProcess != NULL)
+    // {
+    //     print("El current no es null\n");
+    //     currentProcess->pcb.rsp = rsp;
+    //     if (currentProcess->pcb.pid != dummyProcess->pcb.pid)
+    //     {
+    //         addProcess(currentProcess, currentList);
+    //     }
+    // }
+    // if (currentList.nReady > 0)
+    // {
+    //     currentProcess = findNextReady(currentList);
+    //     if (currentProcess == NULL)
+    //     {
+    //         print("el findNextReady es null\n");
+    //     }
+    //     print("Hay elementos ready\n");
+    //     currentProcess = removeProcess(currentList);
+    // }
+    // else
+    // {
+    //     print("Entro al else\n");
+    //     currentProcess = dummyProcess;
+    // }
+    // print(currentProcess->pcb.name);
+    if(currentProcess == NULL){
+        if(!isEmpty(currentList))
+            currentProcess = removeProcess(currentList);
+    }else{
         currentProcess->pcb.rsp = rsp;
-        if(currentProcess->pcb.pid != dummyProcess->pcb.pid){
-            addProcess(currentProcess, &currentList);
+        addProcess(currentProcess, currentList);
+        if(currentList->nReady > 0){
+            currentProcess = findNextReady(currentList);
         }
     }
-    if (currentList.nReady > 0)
-    {
-        currentProcess = findNextReady(&currentList);
-    }
-    else
-    {
-        currentProcess = dummyProcess;
-    }
-    
     return currentProcess->pcb.rsp;
 }
 
-//Funcion auxiliar para la creacion del PCB.
-static uint64_t initializeProcess(pcb_t *process, char *name)
+// Funcion auxiliar para la creacion del PCB.
+static uint64_t initializeProcess(processNode *node, char *name)
 {
-    process->pid = getNewPid();
-    memcpy(process->name, name, strlen(name));
-    process->rbp = (uint64_t)mallocFF(STACK_SIZE);
+    pcb_t * pcb = &(node->pcb);
+    pcb->pid = getNewPid();
+    memcpy(pcb->name, name, strlen(name));
     // if(process->rbp == NULL){
     //     printf("Malloc returned NULL");
     //     return
     // }
-    process->rbp = process->rbp + STACK_SIZE - 1;
-    process->rsp = process->rbp - 1;
-    process->state = READY;
-    uint64_t toReturn = process->pid;
-    return toReturn;
+    pcb->rbp = (uint64_t)node + STACK_SIZE + sizeof(processNode) - sizeof(char *);
+    pcb->rsp = (uint64_t)(pcb->rbp - sizeof(stackFrame));
+    pcb->state = READY;
+    return pcb->pid;
 }
 
-
-
-//Funcion auxiliar para la creacion del stack frame del proceso
-static void initializeStackFrame(int argc, char **argv, void *rbp, void (*fn)(int, char **), uint64_t pid)
+// Funcion auxiliar para la creacion del stack frame del proceso
+static void initializeStackFrame(int argc, char **argv, processNode *node, void (*fn)(int, char **), uint64_t pid)
 {
-    stackFrame *stack = (stackFrame *)rbp - 1;
+    stackFrame *stack = (stackFrame *)(node->pcb.rsp);
     // Se incializan los registros con numeros seguidos, se hace mas facil para debuggear.
     stack->r15 = 0x001;
     stack->r14 = 0x002;
@@ -181,20 +207,20 @@ static void initializeStackFrame(int argc, char **argv, void *rbp, void (*fn)(in
     stack->r10 = 0x006;
     stack->r9 = 0x007;
     stack->r8 = 0x008;
-    //Se completa el stack con la informacion necesaria a la hora de ejecutar el proceso
+    // Se completa el stack con la informacion necesaria a la hora de ejecutar el proceso.
     stack->rsi = (uint64_t)argv;
-    stack->rdi = argc - 1;
-    stack->rbp = (uint64_t)rbp;
+    stack->rdi = argc;
+    stack->rbp = 0;
     stack->rdx = (uint64_t)fn;
     stack->rcx = pid;
     stack->rip = (uint64_t)loaderStart;
     stack->cs = 0x8;
     stack->rflags = 0x202;
-    stack->rsp = stack->rbp;
-    stack->ss = 0;
+    stack->rsp = (uint64_t)(node->pcb.rsp);
+    stack->ss = 0x0;
 }
 
-// Funciones de la lista circular para los procesos
+// Funciones de la lista circular para los procesos.
 static void addProcess(struct processNode *nodeToAdd, struct processList *list)
 {
     if (nodeToAdd == NULL || list == NULL)
@@ -207,27 +233,10 @@ static void addProcess(struct processNode *nodeToAdd, struct processList *list)
         list->last->next = nodeToAdd;
     list->last = nodeToAdd;
     nodeToAdd->next = NULL;
-    if(nodeToAdd->pcb.state == READY)
+    if (nodeToAdd->pcb.state == READY)
         list->nReady++;
     // En caso del que proceso agregado este en ready falta sumar para decir que se agrego.
     list->size++;
-}
-// Se crea un nuevo proceso creando el pcb y el stackframe que le corresponde. Se retorna su PID > 0 en caso de que salga todo bien. En caso de error se retorna 0
-uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
-{
-    processNode *newProcess = mallocFF(sizeof(processNode));
-    if (newProcess == NULL)
-        return 0;
-    initializeProcess(&newProcess->pcb, argv[0]);
-    char **args = mallocFF(sizeof(char *) * argc);
-    copyArguments(args, argv, argc);
-    if (args == NULL)
-    {
-        return 0;
-    }
-    initializeStackFrame(argc, args, (void *) newProcess->pcb.rbp, fn, newProcess->pcb.pid);
-    addProcess(newProcess, &currentList);
-    return newProcess->pcb.pid;
 }
 
 static struct processNode *removeProcess(struct processList *list)
@@ -241,17 +250,42 @@ static struct processNode *removeProcess(struct processList *list)
 
     list->first = list->first->next;
     if (ret->pcb.state == READY)
-        list->nReady --;
-    //TODO Falta disminuir la cantidad de readys que hay.
+        list->nReady--; // Se disminuye la cantidad de readys que hay.
     list->size--;
     return ret;
+}
+
+// Se crea un nuevo proceso creando el pcb y el stackframe que le corresponde. Se retorna su PID > 0 en caso de que salga todo bien. En caso de error se retorna 0
+uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
+{
+    //print("Entra a createProcess\n");
+    processNode *newProcess = mallocFF(sizeof(processNode)+ STACK_SIZE);
+    if (newProcess == NULL)
+    {
+        return 0;
+    }
+    initializeProcess(newProcess, argv[0]);
+    //print("Sale de initializeProcess\n");
+    //print((char *)newProcess->pcb.pid);
+    char **args = mallocFF(sizeof(char *) * argc);
+    copyArguments(args, argv, argc);
+    if (args == NULL)
+    {
+        //print("args NULL create process\n");
+        return 0;
+    }
+    initializeStackFrame(argc, args, newProcess, fn, newProcess->pcb.pid);
+    //print("Sale de initializeStackFrame\n");
+    addProcess(newProcess, currentList);
+    //print(newProcess->pcb.name);
+    print("Sale de addProcess\n");
+    return newProcess->pcb.pid;
 }
 
 static int isEmpty(struct processList *list)
 {
     return list->size == 0;
 }
-
 
 static void loaderStart(int argc, char *argv[], void *function(int, char **))
 {
@@ -282,10 +316,11 @@ struct processNode *getProcess(uint64_t pid)
 {
     if (currentProcess->pcb.pid == pid)
         return currentProcess;
-    struct processNode *aux = currentList.first;
+    struct processNode *aux = currentList->first;
 
-    while (aux != NULL){
-        if(aux->pcb.pid == pid)
+    while (aux != NULL)
+    {
+        if (aux->pcb.pid == pid)
             return aux;
         aux = aux->next;
     }
@@ -303,17 +338,16 @@ uint16_t changeState(uint64_t pid, states newState)
     }
     struct processNode *aux = getProcess(pid);
 
-    if(aux == NULL || aux->pcb.state == KILLED)
-        return -1; //No se puede hacer el cambio porque o no encontro el pid o ya esta muerto
+    if (aux == NULL || aux->pcb.state == KILLED)
+        return -1; // No se puede hacer el cambio porque o no encontro el pid o ya esta muerto.
 
-    if(aux->pcb.state == newState)
+    if (aux->pcb.state == newState)
         return 1;
 
-    if(aux->pcb.state != READY && newState == READY)
-        currentList.nReady++;
-    else if(aux->pcb.state == READY && newState != READY)
-        currentList.nReady--;
-    
+    if (aux->pcb.state != READY && newState == READY)
+        currentList->nReady++;
+    else if (aux->pcb.state == READY && newState != READY)
+        currentList->nReady--;
     aux->pcb.state = newState;
     return 0;
 }

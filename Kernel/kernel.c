@@ -26,7 +26,7 @@ static void *const sampleCodeModuleAddress = (void *)0x400000;
 static void *const sampleDataModuleAddress = (void *)0x500000;
 static void *const heapBaseAddress = (void *)0x600000;
 
-#define HEAP_SIZE (1024*1024*120)
+#define HEAP_SIZE (1024*1024*128) // 128 MB
 typedef int (*EntryPoint)();
 
 void clearBSS(void *bssAddress, uint64_t bssSize)
@@ -56,9 +56,13 @@ void *initializeKernelBinary()
 
 int main()
 {
-	load_idt();
 	initialStateSnapshot((uint64_t)sampleCodeModuleAddress, getSP());
 	initializeMem(heapBaseAddress, HEAP_SIZE);
 	initializeScheduler();
+	load_idt();
+	char *argv[] = {"./sample"};
+	createProcess(sampleDataModuleAddress, 1, argv);
+	_hlt();
+	print("En las peores.\n");
 	return ((EntryPoint)sampleCodeModuleAddress)();
 }

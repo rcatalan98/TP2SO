@@ -53,7 +53,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         freeFF((void *)rsi);
         return 1;
     case 11:
-        return createProcess((void(*) (int, char **)) rsi, rdx, (char **) rcx);
+        // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
+        return createProcess((void (*)(int, char **))rsi, (int) rdx, (char **)rcx);
     default:
         break;
     }
