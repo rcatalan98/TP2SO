@@ -61,7 +61,8 @@ int main()
 	initializeScheduler();
 	load_idt();
 	char *argv[] = {"./sample"};
-	createProcess(sampleDataModuleAddress, 1, argv);
+	createProcess(sampleCodeModuleAddress, 1, argv);
+	_sti();
 	_hlt();
 	print("En las peores.\n");
 	return ((EntryPoint)sampleCodeModuleAddress)();

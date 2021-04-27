@@ -283,3 +283,60 @@ make clean && make all
 make clean && make all
 make clean && make all
 exit
+make clean && make all
+cd root
+make clean && make all
+make clean
+apt install net-tools
+apt install net-tools
+ifconfig
+ls
+make clean
+make all
+make clean
+make all
+make clean
+make all
+make clean
+make all
+make clean
+make all
+make clean
+make all
+ls
+find help
+find . -name "*.elf"
+gdb
+ls
+make clean
+make all
+cd root
+ls
+gdb
+gdb
+gdb
+exit
+cd root
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+make clean
+make all
+gdb
+gdb
+make clean
+make all
+exit
+cd root
+ls
+make clean && make all
+gdb
+gdb
+gdb
+make clean && make all
+exit

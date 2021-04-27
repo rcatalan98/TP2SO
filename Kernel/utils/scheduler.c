@@ -96,7 +96,7 @@ static uint64_t getNewPid()
 void initializeScheduler()
 {
     //Inicializamos la lista
-    currentList = mallocFF(sizeof(processList));
+    currentList = mallocFF(sizeof(processList));//falta verificar que no sea null
     currentList->first = NULL;
     currentList->last = NULL;
     currentList->nReady = 0;
