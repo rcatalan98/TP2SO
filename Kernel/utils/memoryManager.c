@@ -37,14 +37,6 @@ void *mallocFF(uint32_t size)
     Node *p;
     Node *prevp = freep;
     int nunits = (size + sizeof(Node) - 1) / sizeof(Node) + 1;
-    // if (prevp == NULL)
-    // {
-    //     // Se inicializa la lista nueva.
-    //     prevp = base;
-    //     freep = prevp;
-    //     base->s.ptr = freep;
-    //     base->s.size = BLOCK_AMOUNT;
-    // }
     for (p = freep; p != NULL; prevp = p, p = p->s.ptr)
     {
         if (p->s.size >= nunits)
@@ -110,4 +102,23 @@ void freeFF(void *ap)
             prev->s.ptr = aux; // Si no hago que el de atrás me apunte.
         }
     }
+}
+
+uint64_t mem()
+{
+    Node *curr;
+    char *message1 = "Block: ";
+    char *message2 = "Bytes: ";
+    curr = freep;
+    for (int i = 1; curr != NULL; curr = curr->s.ptr, i++)
+    {
+        print(message1);
+        printInt(i);
+        print("\t");
+        print(message2);
+        printInt(curr->s.size);
+        print("\n");
+    }
+
+    return 1;
 }

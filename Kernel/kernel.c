@@ -64,6 +64,6 @@ int main()
 	createProcess(sampleCodeModuleAddress, 1, argv);
 	_sti();
 	_hlt();
-	print("En las peores.\n");
+	print("Warning: Out of Kernel.\n");
 	return ((EntryPoint)sampleCodeModuleAddress)();
 }

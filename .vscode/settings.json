@@ -3,6 +3,10 @@
         "shell.h": "c",
         "stdio.h": "c",
         "lib.h": "c",
-        "videodriver.h": "c"
+        "videodriver.h": "c",
+        "scheduler.h": "c",
+        "stdlib.h": "c",
+        "time.h": "c",
+        "memorymanager.h": "c"
     }
 }

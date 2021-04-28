@@ -40,7 +40,15 @@ extern uint64_t _createProcess(void (*fn)(int, char **), int argc, char **argv);
 
 extern void *_mallocFF(uint32_t size);
 
-void _freeFF(void *ap);
+extern void _freeFF(void *ap);
+
+extern uint64_t _kill(uint64_t pid);
+
+extern uint64_t _mem();
+
+extern uint64_t _ps();
+
+extern uint64_t _block(uint64_t pid);
 
 extern void getRegs(int argcount, char *args[]);
 

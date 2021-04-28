@@ -6,4 +6,5 @@
 void *mallocFF(uint32_t size);
 void freeFF(void *ap);
 void initializeMem(void *baseAllocation, uint32_t baseSize);
+uint64_t mem();
 #endif

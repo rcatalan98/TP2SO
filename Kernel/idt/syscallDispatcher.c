@@ -50,11 +50,24 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         return (uint64_t)mallocFF(rsi);
     case 10:
         // void freeFF(void *ap)
+        //falta progamar algo para tema de errores.
         freeFF((void *)rsi);
         return 1;
     case 11:
+        // uint64_t mem();
+        return mem();
+    case 12:
         // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
-        return createProcess((void (*)(int, char **))rsi, (int) rdx, (char **)rcx);
+        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx);
+    case 13:
+        // uint64_t kill(uint64_t pid);
+        return kill((uint64_t)rsi);
+    case 14:
+        // uint64_t block(uint64_t pid);
+        return block((uint64_t)rsi);
+    case 15:
+        // uint64_t ps();
+        return ps();
     default:
         break;
     }

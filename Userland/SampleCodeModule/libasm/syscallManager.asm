@@ -14,6 +14,10 @@ GLOBAL _getPixelWidth
 GLOBAL _mallocFF
 GLOBAL _createProcess
 GLOBAL _freeFF
+GLOBAL _kill
+GLOBAL _block
+GLOBAL _mem
+GLOBAL _ps
 
 SECTION .text
 
@@ -90,5 +94,13 @@ _mallocFF:
 	syscall 9
 _freeFF:
 	syscall 10
-_createProcess:
+_mem:
 	syscall 11
+_createProcess:
+	syscall 12
+_kill:
+	syscall 13
+_block:
+	syscall 14
+_ps:
+	syscall 15

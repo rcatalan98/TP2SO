@@ -4,7 +4,7 @@
 #include "../include/shell.h"
 
 #define MAX_INPUT 30
-#define MAX_SIZE 10
+#define MAX_SIZE 15
 #define MAX_ARGUMENTS 3
 #define REG_SIZE 17
 #define ESC 27
@@ -36,6 +36,10 @@ void loadCommands()
     loadCommand(&invalidZeroDivisionException, "invalidZeroDivisionException", "Displays exception of an invalid division by zero.\n");
     loadCommand(&chess, "chess", "Play a 1v1 match against a friend or yourself!.\nType 'chess -c' to continue the previous match.\nType 'chess -man' to display instructions.\n");
     loadCommand(&_clearScreen, "clear", "Clears the whole screen.\n");
+    loadCommand(&_kill, "kill", "Kills a running process.\n");
+    loadCommand(&_block, "block", "Blocks a running process.\n");
+    loadCommand(&_mem,"mem","Prints the current memory state.\n");
+    loadCommand(&_ps, "ps", "Prints running processes information.\n");
 }
 
 void loadCommand(void (*fn)(), char *name, char *desc)

@@ -3,6 +3,8 @@
 #define MAX_NAME 20
 #define STACK_SIZE 4 * 1024
 #define PROCESS_SIZE (8 * 1024 - sizeof(proccessNode)) // 8 KB
+#define FIRST_PID 1
+#define MAX_REGISTER_SIZE 16
 
 typedef enum
 {
@@ -39,6 +41,7 @@ typedef struct pcb_t
     uint64_t pid;
     uint64_t rsp;
     uint64_t rbp;
+    uint64_t priority; //por ahora no se usa
     states state;
 } pcb_t;
 typedef struct processNode
@@ -54,7 +57,7 @@ typedef struct processList
     uint32_t nReady;
 } processList;
 
-static struct processList *currentList;
+static struct processList currentList;
 static processNode *currentProcess;
 static processNode *dummyProcess;
 static uint64_t pidCounter = 1;
@@ -63,16 +66,18 @@ static uint64_t initializeProcess(processNode *process, char *name);
 static void addProcess(struct processNode *nodeToAdd, struct processList *list);
 static struct processNode *removeProcess(struct processList *list);
 static int isEmpty(struct processList *list);
-static void exit();
 static void freeProcess(struct processNode *nodeToRemove);
-uint16_t changeState(uint64_t pid, states newState);
 struct processNode *getProcess(uint64_t pid);
+static void exitProcess();
+uint16_t changeState(uint64_t pid, states newState);
 
 static void copyArguments(char **d, char **from, int amount)
 {
     for (int i = 0; i < amount; i++)
     {
         d[i] = mallocFF(sizeof(char) * (strlen(from[i]) + 1));
+        if(d[i]== NULL)
+            return;
         memcpy(d[i], from[i], strlen(from[i]));
     }
 }
@@ -96,27 +101,16 @@ static uint64_t getNewPid()
 void initializeScheduler()
 {
     //Inicializamos la lista
-    currentList = mallocFF(sizeof(processList));//falta verificar que no sea null
-    currentList->first = NULL;
-    currentList->last = NULL;
-    currentList->nReady = 0;
-    currentList->size = 0;
-
+    currentList.first = NULL;
+    currentList.last = NULL;
+    currentList.nReady = 0;
+    currentList.size = 0;
     currentProcess = NULL;
     // Agregamos como primer proceso el dummy.
     char *argv[] = {"dummyProcess"};
     int pid = createProcess((void *)&dummyP, 1, argv);
-    dummyProcess = removeProcess(currentList);
+    dummyProcess = removeProcess(&currentList);
 }
-
-// static uint64_t switchContext(uint64_t rsp)
-// {
-//     if (currentProcess != NULL)
-//     {
-//         currentProcess->pcb.rsp = rsp;
-//     }
-//     return currentProcess->pcb.rsp;
-// }
 
 static processNode *findNextReady(struct processList *list)
 {
@@ -165,23 +159,30 @@ uint64_t scheduler(uint64_t rsp)
     //     currentProcess = dummyProcess;
     // }
     // print(currentProcess->pcb.name);
-    if(currentProcess == NULL){
-        if(!isEmpty(currentList))
-            currentProcess = removeProcess(currentList);
-    }else{
+    if (currentProcess == NULL)
+    {
+        if (!isEmpty(&currentList))
+            currentProcess = removeProcess(&currentList);
+        else
+            return rsp;
+    }
+    else
+    {
         currentProcess->pcb.rsp = rsp;
-        addProcess(currentProcess, currentList);
-        if(currentList->nReady > 0){
-            currentProcess = findNextReady(currentList);
+        //addProcess(currentProcess, &currentList);
+        if (currentList.nReady > 0)
+        {
+            currentProcess = findNextReady(&currentList);
         }
     }
+    addProcess(currentProcess, &currentList);
     return currentProcess->pcb.rsp;
 }
 
 // Funcion auxiliar para la creacion del PCB.
 static uint64_t initializeProcess(processNode *node, char *name)
 {
-    pcb_t * pcb = &(node->pcb);
+    pcb_t *pcb = &(node->pcb);
     pcb->pid = getNewPid();
     memcpy(pcb->name, name, strlen(name));
     // if(process->rbp == NULL){
@@ -191,6 +192,7 @@ static uint64_t initializeProcess(processNode *node, char *name)
     pcb->rbp = (uint64_t)node + STACK_SIZE + sizeof(processNode) - sizeof(char *);
     pcb->rsp = (uint64_t)(pcb->rbp - sizeof(stackFrame));
     pcb->state = READY;
+    pcb->priority = 0; //despues hay que implementar
     return pcb->pid;
 }
 
@@ -259,7 +261,7 @@ static struct processNode *removeProcess(struct processList *list)
 uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
 {
     //print("Entra a createProcess\n");
-    processNode *newProcess = mallocFF(sizeof(processNode)+ STACK_SIZE);
+    processNode *newProcess = mallocFF(sizeof(processNode) + STACK_SIZE);
     if (newProcess == NULL)
     {
         return 0;
@@ -268,17 +270,16 @@ uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
     //print("Sale de initializeProcess\n");
     //print((char *)newProcess->pcb.pid);
     char **args = mallocFF(sizeof(char *) * argc);
-    copyArguments(args, argv, argc);
     if (args == NULL)
     {
-        //print("args NULL create process\n");
         return 0;
     }
+    copyArguments(args, argv, argc);
     initializeStackFrame(argc, args, newProcess, fn, newProcess->pcb.pid);
     //print("Sale de initializeStackFrame\n");
-    addProcess(newProcess, currentList);
+    addProcess(newProcess, &currentList);
     //print(newProcess->pcb.name);
-    print("Sale de addProcess\n");
+    // print("Sale de addProcess\n");
     return newProcess->pcb.pid;
 }
 
@@ -287,24 +288,41 @@ static int isEmpty(struct processList *list)
     return list->size == 0;
 }
 
-static void loaderStart(int argc, char *argv[], void *function(int, char **))
+void loaderStart(int argc, char *argv[], void *function(int, char **))
 {
     function(argc, argv);
-    exit();
+    exitProcess();
 }
 
-static void exit()
+static void exitProcess()
 {
     kill(currentProcess->pcb.pid);
 }
 
 // Retorna 0 en caso de exito, -1 si existe algun tipo de error. Como en linux.
-static uint16_t kill(uint64_t pid)
+uint64_t kill(uint64_t pid)
 {
     uint16_t done = changeState(pid, KILLED);
     if (pid == currentProcess->pcb.pid)
         forceTimer();
     return done;
+}
+
+uint64_t block(uint64_t pid)
+{
+    if(pid<FIRST_PID)
+        return -1;
+    int toReturn = changeState(pid, BLOCKED);
+    if (pid == currentProcess->pcb.pid)
+    {
+        forceTimer();
+    }
+    return toReturn;
+}
+uint64_t unblock(uint64_t pid){
+    if(pid<FIRST_PID)
+        return -1;
+    return changeState(pid, READY);
 }
 
 static void freeProcess(struct processNode *nodeToRemove)
@@ -316,7 +334,7 @@ struct processNode *getProcess(uint64_t pid)
 {
     if (currentProcess->pcb.pid == pid)
         return currentProcess;
-    struct processNode *aux = currentList->first;
+    struct processNode *aux = currentList.first;
 
     while (aux != NULL)
     {
@@ -325,6 +343,47 @@ struct processNode *getProcess(uint64_t pid)
         aux = aux->next;
     }
     return NULL;
+}
+
+void printProcess(struct processNode *toPrint)
+{
+    char aux[MAX_REGISTER_SIZE + 1];
+    print(toPrint->pcb.name);
+    print("\t");
+    printInt(toPrint->pcb.pid);
+    print("\t");
+    printInt(toPrint->pcb.priority);
+    print("\t");
+    printInt(uintToBase(toPrint->pcb.rsp, aux, 16));
+    print("\t");
+    printInt(uintToBase(toPrint->pcb.rbp, aux, 16));
+    print("\t");
+    print("falta");
+    print("\t");
+    printInt(toPrint->pcb.state);
+    print("\n");
+}
+
+//Falta agregar foreground y prioridad
+uint64_t ps()
+{
+    struct processNode *aux = currentList.first;
+    print("list size ");
+    printInt(currentList.size);
+    print("\n");
+    if(aux == NULL)
+    {
+        print("There are no processes to show\n");
+        return 0;
+    }
+    print("NAME    PID    PRIORITY  RSP    RBP    FOREGROUND    STATE\n");
+
+    while (aux != NULL)
+    {
+        printProcess(aux);
+        aux = aux->next;
+    } 
+    return 1;  
 }
 
 uint16_t changeState(uint64_t pid, states newState)
@@ -345,9 +404,9 @@ uint16_t changeState(uint64_t pid, states newState)
         return 1;
 
     if (aux->pcb.state != READY && newState == READY)
-        currentList->nReady++;
+        currentList.nReady++;
     else if (aux->pcb.state == READY && newState != READY)
-        currentList->nReady--;
+        currentList.nReady--;
     aux->pcb.state = newState;
     return 0;
 }

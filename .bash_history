@@ -340,3 +340,62 @@ gdb
 gdb
 make clean && make all
 exit
+make clean
+cd root
+make clean
+make all
+find . -name "*.elf"
+cd root
+make clean
+make all
+cd root
+make clean && make all
+make clean && make all
+exit
+cd root
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+exit
+cd root
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+exit
+make clean && make all
+cd root
+make clean && make all
+make clean && make all
+exit
+cd root
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean && make all
+make clean
+cd Toolchain
+make clean
+cd ..

@@ -1,4 +1,6 @@
 
 Userland/.DS_Store
-
+desktop.ini
 .DS_Store
+.vscode
+.bash_history
