@@ -8,7 +8,7 @@
 #define MAX_ARGUMENTS 3
 #define REG_SIZE 17
 #define ESC 27
-
+#define LOOP_TIME 1
 t_command commands[MAX_SIZE];
 static int sizeC = 0;
 
@@ -40,6 +40,8 @@ void loadCommands()
     loadCommand(&_block, "block", "Blocks a running process.\n");
     loadCommand(&_mem,"mem","Prints the current memory state.\n");
     loadCommand(&_ps, "ps", "Prints running processes information.\n");
+    loadCommand(&loop, "loop", "Prints the current process ID and a message\n");
+    loadCommand(&sleep, "sleep","Delay for a specified amount of time\n");
 }
 
 void loadCommand(void (*fn)(), char *name, char *desc)
@@ -89,7 +91,13 @@ int processInput(char *inputBuffer)
     {
         if (strcmp(args[0], commands[i].name))
         {
-            commands[i].command(argSize - 1, args + 1);
+            //Se agrega la funcion como un proceso nuevo
+            printInt(argSize);
+            int pid = _createProcess(commands[i].command, argSize, args);
+            print("Se agrego el proceso ");
+            printInt(pid);
+            print("\n");
+            //commands[i].command(argSize - 1, args + 1);
             return 1;
         }
     }
@@ -210,5 +218,23 @@ void chess(int argSize, char *args[])
         print("- Coronation: By default a pawn transforms into a queen.\n");
         print("- Rotate: 'r' to rotate 90 degrees the board.\n");
         print("- Exit: 'ESC' to leave the game.\n");
+    }
+}
+
+void sleep(int seconds)
+{
+    int secondsElapsed = _secondsElapsed();
+    int finalTime = seconds + secondsElapsed;
+    while (_secondsElapsed() <= finalTime);
+}
+void loop()
+{
+    int currentPid = _getPid();
+    while(1)
+    {
+        sleep(LOOP_TIME);
+        print("Soy el proceso: ");
+        printInt(currentPid);
+        print("\n");
     }
 }

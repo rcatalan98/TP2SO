@@ -35,6 +35,6 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf libasm/*.o *.o *.bin drivers/*.o idt/*.o libc/*.o utils/*.o
+	rm -rf libasm/*.o *.o *.bin utils/*.o drivers/*.o idt/*.o libc/*.o kernel.elf
 
 .PHONY: all clean

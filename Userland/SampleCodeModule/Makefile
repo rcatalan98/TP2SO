@@ -23,6 +23,6 @@ $(MODULE): $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_APPS) $(OBJECTS_LIBC)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o libasm/*.o libc/*.o apps/*.o *.bin
+	rm -rf *.o libasm/*.o libc/*.o apps/*.o *.bin 0000-sampleCodeModule.elf
 
 .PHONY: all clean print

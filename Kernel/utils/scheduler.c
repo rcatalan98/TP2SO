@@ -70,6 +70,8 @@ static void freeProcess(struct processNode *nodeToRemove);
 struct processNode *getProcess(uint64_t pid);
 static void exitProcess();
 uint16_t changeState(uint64_t pid, states newState);
+static uint64_t getNewPid();
+uint64_t getPid();
 
 static void copyArguments(char **d, char **from, int amount)
 {
@@ -96,6 +98,11 @@ static int dummyP(int argc, char **argv)
 static uint64_t getNewPid()
 {
     return pidCounter++;
+}
+
+uint64_t getPid()
+{
+    return currentProcess->pcb.pid;
 }
 
 void initializeScheduler()
@@ -269,6 +276,8 @@ uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
     initializeProcess(newProcess, argv[0]);
     //print("Sale de initializeProcess\n");
     //print((char *)newProcess->pcb.pid);
+    print("argc: ");
+    printInt(argc);
     char **args = mallocFF(sizeof(char *) * argc);
     if (args == NULL)
     {
@@ -351,15 +360,17 @@ void printProcess(struct processNode *toPrint)
     print(toPrint->pcb.name);
     print("\t");
     printInt(toPrint->pcb.pid);
-    print("\t");
+    print("\t\t\t");
     printInt(toPrint->pcb.priority);
+    print("\t\t");
+    //printInt(uintToBase(toPrint->pcb.rsp, aux, 16));
+    printHex(toPrint->pcb.rsp);
     print("\t");
-    printInt(uintToBase(toPrint->pcb.rsp, aux, 16));
-    print("\t");
-    printInt(uintToBase(toPrint->pcb.rbp, aux, 16));
+    //printInt(uintToBase(toPrint->pcb.rbp, aux, 16));
+    printHex(toPrint->pcb.rbp);
     print("\t");
     print("falta");
-    print("\t");
+    print("\t\t\t");
     printInt(toPrint->pcb.state);
     print("\n");
 }
@@ -376,7 +387,7 @@ uint64_t ps()
         print("There are no processes to show\n");
         return 0;
     }
-    print("NAME    PID    PRIORITY  RSP    RBP    FOREGROUND    STATE\n");
+    print("NAME    PID      PRIORITY     RSP        RBP        FOREGROUND    STATE\n");
 
     while (aux != NULL)
     {

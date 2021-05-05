@@ -5,6 +5,7 @@
 #include "defs.h"
 #include "memoryManager.h"
 #include "interrupts.h"
+#include "naiveConsole.h"
 extern void forceTimer();
 void initializeScheduler();
 void wait(uint64_t pid);

@@ -10,6 +10,7 @@ void backspace();
 void enter();
 void tab();
 void blinkCursor();
+static char buffer[64] = {'0'};
 
 void setCursor(unsigned int new_x, unsigned int new_y, int color)
 {
@@ -99,4 +100,14 @@ void tab()
     }
     ((x += (4 * FONT_SIZE)) < width) ? setCursor(x, y, cursorColor) : enter();
 }
+void printBase(uint64_t value, uint32_t base)
+{
+    uintToBase(value, buffer, base);
+    print(buffer);
+}
+void printHex(uint64_t value)
+{
+    printBase(value, 16);
+}
+
 

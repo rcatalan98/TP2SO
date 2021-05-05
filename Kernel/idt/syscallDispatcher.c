@@ -68,6 +68,11 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
     case 15:
         // uint64_t ps();
         return ps();
+    case 16:
+        // uint64_t getPid();
+        return getPid();
+    case 17:
+        return secondsElapsed();
     default:
         break;
     }

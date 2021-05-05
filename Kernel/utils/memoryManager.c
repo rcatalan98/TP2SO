@@ -32,8 +32,9 @@ void initializeMem(void *baseAllocation, uint32_t size)
 void *mallocFF(uint32_t size)
 {
     // Si size == 0 entonces retorno NULL
-    if (size == 0)
+    if (size == 0){
         return NULL;
+    }
     Node *p;
     Node *prevp = freep;
     int nunits = (size + sizeof(Node) - 1) / sizeof(Node) + 1;

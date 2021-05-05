@@ -18,7 +18,8 @@ GLOBAL _kill
 GLOBAL _block
 GLOBAL _mem
 GLOBAL _ps
-
+GLOBAL _getPid
+GLOBAL _secondsElapsed
 SECTION .text
 
 
@@ -104,3 +105,7 @@ _block:
 	syscall 14
 _ps:
 	syscall 15
+_getPid:
+	syscall 16
+_secondsElapsed:
+	syscall 17

@@ -26,6 +26,8 @@ uint64_t sWrite(char *buffer, int size, int color);
  * Imprime un numero en pantalla con colores y tamaño defecto.
  */ 
 void printInt(int num);
+void printBase(uint64_t value, uint32_t base);
+void printHex(uint64_t value);
 #endif
 
 

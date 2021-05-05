@@ -85,5 +85,7 @@ void printmem();
 void invalidOpCodeException();
 void invalidZeroDivisionException();
 void chess(int argSize, char *args[]);
+void loop(); //Falta revisar aca el tema de como le pasamos los argumentos.
+void sleep(int seconds);
 
 #endif
