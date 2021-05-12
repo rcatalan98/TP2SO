@@ -61,7 +61,10 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx);
     case 13:
         // uint64_t kill(uint64_t pid);
-        return kill((uint64_t)rsi);
+        print("RSI: ");
+        printInt((int)rsi);
+        print("\n");
+        return kill((uint64_t)4);
     case 14:
         // uint64_t block(uint64_t pid);
         return block((uint64_t)rsi);

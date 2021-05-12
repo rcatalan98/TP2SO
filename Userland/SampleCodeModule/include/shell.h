@@ -23,11 +23,15 @@
 #define MONTH 8
 #define YEAR 9
 
+#define TRUE 1
+#define FALSE 0
+
 typedef struct
 {
     void (*command)(int argSize, char *args[]);
     char *name;
     char *description;
+    int builtIn; //flag for declaring if the function is built in.
 } t_command;
 
 extern void _setCursor(int x, int y, int color);
@@ -71,7 +75,7 @@ void loadCommands();
 /**
  * Actua de 
 */
-void loadCommand(void (*fn)(), char *name, char *desc);
+void loadCommand(void (*fn)(), char *name, char *desc, int builtIn);
 
 int readInput(char *inputBuffer, int maxSize, char token);
 int processInput(char *inputBuffer);

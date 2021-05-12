@@ -311,9 +311,19 @@ static void exitProcess()
 // Retorna 0 en caso de exito, -1 si existe algun tipo de error. Como en linux.
 uint64_t kill(uint64_t pid)
 {
+    print("CURRENT PID: ");
+    printInt(currentProcess->pcb.pid);
+    print("\n");
+    print("PID: ");
+    printInt(pid);
+    print("\n");
     uint16_t done = changeState(pid, KILLED);
+    
     if (pid == currentProcess->pcb.pid)
         forceTimer();
+    print("Kill retorna: ");
+    printInt(done);
+    print("\n");
     return done;
 }
 
@@ -357,8 +367,6 @@ struct processNode *getProcess(uint64_t pid)
 void printProcess(struct processNode *toPrint)
 {
     char aux[MAX_REGISTER_SIZE + 1];
-    print(toPrint->pcb.name);
-    print("\t");
     printInt(toPrint->pcb.pid);
     print("\t\t\t");
     printInt(toPrint->pcb.priority);
@@ -372,6 +380,8 @@ void printProcess(struct processNode *toPrint)
     print("falta");
     print("\t\t\t");
     printInt(toPrint->pcb.state);
+    print("\t");
+    print(toPrint->pcb.name);
     print("\n");
 }
 
@@ -387,7 +397,7 @@ uint64_t ps()
         print("There are no processes to show\n");
         return 0;
     }
-    print("NAME    PID      PRIORITY     RSP        RBP        FOREGROUND    STATE\n");
+    print("PID      PRIORITY     RSP        RBP        FOREGROUND    STATE      NAME\n");
 
     while (aux != NULL)
     {
@@ -409,7 +419,7 @@ uint16_t changeState(uint64_t pid, states newState)
     struct processNode *aux = getProcess(pid);
 
     if (aux == NULL || aux->pcb.state == KILLED)
-        return -1; // No se puede hacer el cambio porque o no encontro el pid o ya esta muerto.
+        return 20; // No se puede hacer el cambio porque o no encontro el pid o ya esta muerto.
 
     if (aux->pcb.state == newState)
         return 1;

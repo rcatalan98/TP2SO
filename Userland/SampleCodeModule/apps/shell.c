@@ -11,7 +11,7 @@
 #define LOOP_TIME 1
 t_command commands[MAX_SIZE];
 static int sizeC = 0;
-
+void test();
 void intializeShell()
 {
     char input[MAX_INPUT];
@@ -28,27 +28,29 @@ void intializeShell()
 
 void loadCommands()
 {
-    loadCommand(&help, "help", "Displays the description of all functions available.\n");
-    loadCommand(&getRegs, "inforeg", "Displays all the information regarding the registers.\n");
-    loadCommand(&printmem, "printmem", "Makes a 32 Bytes memory dump to screen from the address passed by argument.\n");
-    loadCommand(&printCurrentTime, "time", "Displays the current time and date.\n");
-    loadCommand(&invalidOpCodeException, "invalidOpCodeException", "Displays exception of an invalid operation code.\n");
-    loadCommand(&invalidZeroDivisionException, "invalidZeroDivisionException", "Displays exception of an invalid division by zero.\n");
-    loadCommand(&chess, "chess", "Play a 1v1 match against a friend or yourself!.\nType 'chess -c' to continue the previous match.\nType 'chess -man' to display instructions.\n");
-    loadCommand(&_clearScreen, "clear", "Clears the whole screen.\n");
-    loadCommand(&_kill, "kill", "Kills a running process.\n");
-    loadCommand(&_block, "block", "Blocks a running process.\n");
-    loadCommand(&_mem,"mem","Prints the current memory state.\n");
-    loadCommand(&_ps, "ps", "Prints running processes information.\n");
-    loadCommand(&loop, "loop", "Prints the current process ID and a message\n");
-    loadCommand(&sleep, "sleep","Delay for a specified amount of time\n");
+    loadCommand(&help, "help", "Displays the description of all functions available.\n", TRUE);
+    loadCommand(&getRegs, "inforeg", "Displays all the information regarding the registers.\n", TRUE);
+    loadCommand(&printmem, "printmem", "Makes a 32 Bytes memory dump to screen from the address passed by argument.\n", TRUE);
+    loadCommand(&printCurrentTime, "time", "Displays the current time and date.\n", TRUE);
+    loadCommand(&invalidOpCodeException, "invalidOpCodeException", "Displays exception of an invalid operation code.\n", TRUE);
+    loadCommand(&invalidZeroDivisionException, "invalidZeroDivisionException", "Displays exception of an invalid division by zero.\n", TRUE);
+    loadCommand(&chess, "chess", "Play a 1v1 match against a friend or yourself!.\nType 'chess -c' to continue the previous match.\nType 'chess -man' to display instructions.\n", FALSE);
+    loadCommand(&_clearScreen, "clear", "Clears the whole screen.\n", TRUE);
+    loadCommand(&_kill, "kill", "Kills a running process.\n", TRUE);
+    loadCommand(&_block, "block", "Blocks a running process.\n", TRUE);
+    loadCommand(&_mem,"mem","Prints the current memory state.\n", TRUE);
+    loadCommand(&_ps, "ps", "Prints running processes information.\n", TRUE);
+    loadCommand(&loop, "loop", "Prints the current process ID and a message.\n", FALSE);
+    loadCommand(&sleep, "sleep","Delay for a specified amount of time.\n", TRUE);
+    loadCommand(&test, "test", "Prints a loop of hello world as a built-in", FALSE);
 }
 
-void loadCommand(void (*fn)(), char *name, char *desc)
+void loadCommand(void (*fn)(), char *name, char *desc, int builtIn)
 {
     commands[sizeC].command = fn;
     commands[sizeC].name = name;
     commands[sizeC].description = desc;
+    commands[sizeC].builtIn = builtIn;
     sizeC++;
 }
 
@@ -91,13 +93,16 @@ int processInput(char *inputBuffer)
     {
         if (strcmp(args[0], commands[i].name))
         {
-            //Se agrega la funcion como un proceso nuevo
+            
             printInt(argSize);
-            int pid = _createProcess(commands[i].command, argSize, args);
-            print("Se agrego el proceso ");
-            printInt(pid);
-            print("\n");
-            //commands[i].command(argSize - 1, args + 1);
+            if(!commands[i].builtIn){
+                //Se agrega la funcion como un proceso nuevo si no es built-in
+                int pid = _createProcess(commands[i].command, argSize, args);
+                print("Se agrego el proceso ");
+                printInt(pid);
+                print("\n");
+            }else   
+                commands[i].command(argSize - 1, args + 1);
             return 1;
         }
     }
@@ -236,5 +241,12 @@ void loop()
         print("Soy el proceso: ");
         printInt(currentPid);
         print("\n");
+    }
+}
+
+void test(){
+    while(1){
+        sleep(LOOP_TIME);
+        print("Hello World\n");
     }
 }
