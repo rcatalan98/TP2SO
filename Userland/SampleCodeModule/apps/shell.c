@@ -36,8 +36,9 @@ void loadCommands()
     loadCommand(&invalidZeroDivisionException, "invalidZeroDivisionException", "Displays exception of an invalid division by zero.\n", TRUE);
     loadCommand(&chess, "chess", "Play a 1v1 match against a friend or yourself!.\nType 'chess -c' to continue the previous match.\nType 'chess -man' to display instructions.\n", FALSE);
     loadCommand(&_clearScreen, "clear", "Clears the whole screen.\n", TRUE);
-    loadCommand(&_kill, "kill", "Kills a running process.\n", TRUE);
-    loadCommand(&_block, "block", "Blocks a running process.\n", TRUE);
+    loadCommand(&wkill, "kill", "Kills a running process.\n", TRUE);
+    loadCommand(&wblock, "block", "Blocks a running process.\n", TRUE);
+    loadCommand(&wunblock, "unblock", "Unlocks a running process.\n", TRUE);
     loadCommand(&_mem,"mem","Prints the current memory state.\n", TRUE);
     loadCommand(&_ps, "ps", "Prints running processes information.\n", TRUE);
     loadCommand(&loop, "loop", "Prints the current process ID and a message.\n", FALSE);
@@ -93,16 +94,17 @@ int processInput(char *inputBuffer)
     {
         if (strcmp(args[0], commands[i].name))
         {
-            
+            print("argSize: ");
             printInt(argSize);
-            if(!commands[i].builtIn){
+            print("\n");
+            if (!commands[i].builtIn)
+            {
                 //Se agrega la funcion como un proceso nuevo si no es built-in
                 int pid = _createProcess(commands[i].command, argSize, args);
-                print("Se agrego el proceso ");
-                printInt(pid);
-                print("\n");
-            }else   
+            }
+            else{
                 commands[i].command(argSize - 1, args + 1);
+                }
             return 1;
         }
     }
@@ -232,6 +234,7 @@ void sleep(int seconds)
     int finalTime = seconds + secondsElapsed;
     while (_secondsElapsed() <= finalTime);
 }
+
 void loop()
 {
     int currentPid = _getPid();
@@ -244,9 +247,26 @@ void loop()
     }
 }
 
-void test(){
-    while(1){
+void test()
+{
+    while(1)
+    {
         sleep(LOOP_TIME);
         print("Hello World\n");
     }
+}
+
+void wblock(int argSize, char *args[])
+{
+    _block(args[0][0] - '0');
+}
+
+void wkill(int argSize, char *args[])
+{
+    _kill(args[0][0] - '0');
+}
+
+void wunblock(int argSize, char *args[])
+{
+    _unblock(args[0][0] - '0');
 }

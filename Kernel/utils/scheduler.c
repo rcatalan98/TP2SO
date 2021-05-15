@@ -311,19 +311,9 @@ static void exitProcess()
 // Retorna 0 en caso de exito, -1 si existe algun tipo de error. Como en linux.
 uint64_t kill(uint64_t pid)
 {
-    print("CURRENT PID: ");
-    printInt(currentProcess->pcb.pid);
-    print("\n");
-    print("PID: ");
-    printInt(pid);
-    print("\n");
     uint16_t done = changeState(pid, KILLED);
-    
     if (pid == currentProcess->pcb.pid)
         forceTimer();
-    print("Kill retorna: ");
-    printInt(done);
-    print("\n");
     return done;
 }
 
@@ -338,7 +328,9 @@ uint64_t block(uint64_t pid)
     }
     return toReturn;
 }
-uint64_t unblock(uint64_t pid){
+
+uint64_t unblock(uint64_t pid)
+{
     if(pid<FIRST_PID)
         return -1;
     return changeState(pid, READY);

@@ -16,6 +16,7 @@ GLOBAL _createProcess
 GLOBAL _freeFF
 GLOBAL _kill
 GLOBAL _block
+GLOBAL _unblock
 GLOBAL _mem
 GLOBAL _ps
 GLOBAL _getPid
@@ -109,3 +110,5 @@ _getPid:
 	syscall 16
 _secondsElapsed:
 	syscall 17
+_unblock:
+	syscall 18

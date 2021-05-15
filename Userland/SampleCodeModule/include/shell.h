@@ -91,5 +91,9 @@ void invalidZeroDivisionException();
 void chess(int argSize, char *args[]);
 void loop(); //Falta revisar aca el tema de como le pasamos los argumentos.
 void sleep(int seconds);
+void wblock(int argSize, char *args[]); //Wrappers para convertir el char en numero y llamar a la syscall
+void wunblock(int argSize, char *args[]); // Wrapper de unblock
+void wkill(int argSize, char *args[]);  // Wrapper de kill
+
 
 #endif
