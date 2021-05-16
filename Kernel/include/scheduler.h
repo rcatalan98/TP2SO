@@ -11,8 +11,10 @@ void initializeScheduler();
 void wait(uint64_t pid);
 void loaderStart(int argc, char *argv[], void *function(int, char **));
 uint64_t block(uint64_t pid);
+uint64_t unblock(uint64_t pid);
 uint64_t kill(uint64_t pid);
 uint64_t scheduler(uint64_t rsp);
 uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv);
 uint64_t ps();
+uint64_t nice(uint64_t pid, uint64_t newPriority);
 #endif

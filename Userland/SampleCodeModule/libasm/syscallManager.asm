@@ -21,6 +21,7 @@ GLOBAL _mem
 GLOBAL _ps
 GLOBAL _getPid
 GLOBAL _secondsElapsed
+GLOBAL _nice
 SECTION .text
 
 
@@ -112,3 +113,5 @@ _secondsElapsed:
 	syscall 17
 _unblock:
 	syscall 18
+_nice:
+	syscall 19

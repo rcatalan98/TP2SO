@@ -4,8 +4,8 @@
 #include "../include/shell.h"
 
 #define MAX_INPUT 30
-#define MAX_SIZE 15
-#define MAX_ARGUMENTS 3
+#define MAX_SIZE 20
+#define MAX_ARGUMENTS 5
 #define REG_SIZE 17
 #define ESC 27
 #define LOOP_TIME 1
@@ -25,7 +25,7 @@ void intializeShell()
         processInput(input);
     }
 }
-
+// TRUE-> es builtin FALSE-> necesita ser un proceso extra
 void loadCommands()
 {
     loadCommand(&help, "help", "Displays the description of all functions available.\n", TRUE);
@@ -43,7 +43,8 @@ void loadCommands()
     loadCommand(&_ps, "ps", "Prints running processes information.\n", TRUE);
     loadCommand(&loop, "loop", "Prints the current process ID and a message.\n", FALSE);
     loadCommand(&sleep, "sleep","Delay for a specified amount of time.\n", TRUE);
-    loadCommand(&test, "test", "Prints a loop of hello world as a built-in", FALSE);
+    loadCommand(&test, "test", "Prints a loop of hello world as a built-in.\n", FALSE);
+    loadCommand(&wnice, "nice", "Changes a process' priority.\n", TRUE); 
 }
 
 void loadCommand(void (*fn)(), char *name, char *desc, int builtIn)
@@ -85,7 +86,7 @@ int processInput(char *inputBuffer)
     char *args[MAX_ARGUMENTS];
     int argSize = strtok(inputBuffer, ' ', args, MAX_ARGUMENTS);
     // Verificamos la cant de args antes de compararlo con los existentes.
-    if (argSize <= 0 || argSize > 2)
+    if (argSize <= 0 || argSize > 5)
     {
         print("Invalid amount of arguments, try again.\n");
         return 0;
@@ -94,12 +95,9 @@ int processInput(char *inputBuffer)
     {
         if (strcmp(args[0], commands[i].name))
         {
-            print("argSize: ");
-            printInt(argSize);
-            print("\n");
             if (!commands[i].builtIn)
             {
-                //Se agrega la funcion como un proceso nuevo si no es built-in
+                // Se agrega la funcion como un proceso nuevo si no es built-in.
                 int pid = _createProcess(commands[i].command, argSize, args);
             }
             else{
@@ -258,15 +256,40 @@ void test()
 
 void wblock(int argSize, char *args[])
 {
+    if (argSize != 1)
+    {
+        print("Wrong amount of parameters\n");
+        return;
+    }
     _block(args[0][0] - '0');
 }
 
 void wkill(int argSize, char *args[])
 {
+    if (argSize != 1)
+    {
+        print("Wrong amount of parameters\n");
+        return;
+    }
     _kill(args[0][0] - '0');
 }
 
 void wunblock(int argSize, char *args[])
 {
+    if (argSize != 1)
+    {
+        print("Wrong amount of parameters\n");
+        return;
+    }
     _unblock(args[0][0] - '0');
+}
+
+void wnice(int argSize, char *args[])
+{
+    if(argSize != 2)
+    {
+        print("Wrong amount of parameters\n");
+        return ;
+    }
+    _nice(args[0][0] - '0', args[1][0] - '0');
 }

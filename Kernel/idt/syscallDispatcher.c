@@ -72,9 +72,14 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         // uint64_t getPid();
         return getPid();
     case 17:
+        // uint64_t secondsElapsed()
         return secondsElapsed();
     case 18:
-        return unblock((uint64_t) rsi);
+        // uint64_t unblock(uint64_t pid);
+        return unblock((uint64_t)rsi);
+    case 19:
+        // uint64_t nice(uint64_t pid, uint64_t newPriority);
+        return nice(rsi, rdx);
     default:
         break;
     }

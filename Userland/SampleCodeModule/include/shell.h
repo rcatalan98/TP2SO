@@ -52,7 +52,15 @@ extern uint64_t _mem();
 
 extern uint64_t _ps();
 
+extern uint64_t _unblock(uint64_t pid);
+
 extern uint64_t _block(uint64_t pid);
+
+extern uint64_t _getPid();
+    
+extern uint64_t _secondsElapsed();
+
+extern uint64_t _nice(uint64_t pid, uint64_t newPriority);
 
 extern void getRegs(int argcount, char *args[]);
 
@@ -91,9 +99,9 @@ void invalidZeroDivisionException();
 void chess(int argSize, char *args[]);
 void loop(); //Falta revisar aca el tema de como le pasamos los argumentos.
 void sleep(int seconds);
-void wblock(int argSize, char *args[]); //Wrappers para convertir el char en numero y llamar a la syscall
-void wunblock(int argSize, char *args[]); // Wrapper de unblock
-void wkill(int argSize, char *args[]);  // Wrapper de kill
-
+void wblock(int argSize, char *args[]);   // Wrappers para convertir el char en numero y llamar a la syscall
+void wunblock(int argSize, char *args[]); // Wrapper de _unblock
+void wkill(int argSize, char *args[]);    // Wrapper de _kill
+void wnice(int argSize, char *args[]);    // Wrapper de _nice
 
 #endif

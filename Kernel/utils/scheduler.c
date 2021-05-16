@@ -5,7 +5,9 @@
 #define PROCESS_SIZE (8 * 1024 - sizeof(proccessNode)) // 8 KB
 #define FIRST_PID 1
 #define MAX_REGISTER_SIZE 16
-
+#define INIT_PRIORITY 1
+#define MAX_PRIORITY 12
+#define QUANTUM 1
 typedef enum
 {
     READY,
@@ -41,7 +43,8 @@ typedef struct pcb_t
     uint64_t pid;
     uint64_t rsp;
     uint64_t rbp;
-    uint64_t priority; //por ahora no se usa
+    uint64_t priority;
+    uint64_t tickets;
     states state;
 } pcb_t;
 typedef struct processNode
@@ -78,7 +81,7 @@ static void copyArguments(char **d, char **from, int amount)
     for (int i = 0; i < amount; i++)
     {
         d[i] = mallocFF(sizeof(char) * (strlen(from[i]) + 1));
-        if(d[i]== NULL)
+        if (d[i] == NULL)
             return;
         memcpy(d[i], from[i], strlen(from[i]));
     }
@@ -140,49 +143,26 @@ uint64_t scheduler(uint64_t rsp)
 {
     // Tengo que fijarme si hay algun proceso corriendo. Si no es asi debo elegir uno de la lista con estado READY.
     // Si hay algun proceso debo hacer el switch context y chequear el tema del timeslot
-    // return rsp;
-    // if (currentProcess != NULL)
-    // {
-    //     print("El current no es null\n");
-    //     currentProcess->pcb.rsp = rsp;
-    //     if (currentProcess->pcb.pid != dummyProcess->pcb.pid)
-    //     {
-    //         addProcess(currentProcess, currentList);
-    //     }
-    // }
-    // if (currentList.nReady > 0)
-    // {
-    //     currentProcess = findNextReady(currentList);
-    //     if (currentProcess == NULL)
-    //     {
-    //         print("el findNextReady es null\n");
-    //     }
-    //     print("Hay elementos ready\n");
-    //     currentProcess = removeProcess(currentList);
-    // }
-    // else
-    // {
-    //     print("Entro al else\n");
-    //     currentProcess = dummyProcess;
-    // }
-    // print(currentProcess->pcb.name);
     if (currentProcess == NULL)
     {
-        if (!isEmpty(&currentList))
-            currentProcess = removeProcess(&currentList);
-        else
+        if (isEmpty(&currentList))
             return rsp;
+        currentProcess = removeProcess(&currentList);
+        currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
+        addProcess(currentProcess, &currentList);
     }
     else
     {
         currentProcess->pcb.rsp = rsp;
-        //addProcess(currentProcess, &currentList);
-        if (currentList.nReady > 0)
-        {
+        if (currentProcess->pcb.tickets <= 0 && currentList.nReady > 0)
+        { 
             currentProcess = findNextReady(&currentList);
+            currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
+            addProcess(currentProcess, &currentList);
         }
     }
-    addProcess(currentProcess, &currentList);
+    //addProcess(currentProcess, &currentList);
+    currentProcess->pcb.tickets--;
     return currentProcess->pcb.rsp;
 }
 
@@ -192,14 +172,11 @@ static uint64_t initializeProcess(processNode *node, char *name)
     pcb_t *pcb = &(node->pcb);
     pcb->pid = getNewPid();
     memcpy(pcb->name, name, strlen(name));
-    // if(process->rbp == NULL){
-    //     printf("Malloc returned NULL");
-    //     return
-    // }
     pcb->rbp = (uint64_t)node + STACK_SIZE + sizeof(processNode) - sizeof(char *);
     pcb->rsp = (uint64_t)(pcb->rbp - sizeof(stackFrame));
     pcb->state = READY;
-    pcb->priority = 0; //despues hay que implementar
+    pcb->priority = INIT_PRIORITY; //despues hay que implementar
+    pcb->tickets = INIT_PRIORITY * QUANTUM;
     return pcb->pid;
 }
 
@@ -245,6 +222,9 @@ static void addProcess(struct processNode *nodeToAdd, struct processList *list)
     if (nodeToAdd->pcb.state == READY)
         list->nReady++;
     // En caso del que proceso agregado este en ready falta sumar para decir que se agrego.
+    // print("Add sizeList -> ");
+    // printInt(list->size);
+    // print("\n");
     list->size++;
 }
 
@@ -260,6 +240,9 @@ static struct processNode *removeProcess(struct processList *list)
     list->first = list->first->next;
     if (ret->pcb.state == READY)
         list->nReady--; // Se disminuye la cantidad de readys que hay.
+    // print("Remove sizeList -> ");
+    // printInt(list->size);
+    // print("\n");
     list->size--;
     return ret;
 }
@@ -267,17 +250,11 @@ static struct processNode *removeProcess(struct processList *list)
 // Se crea un nuevo proceso creando el pcb y el stackframe que le corresponde. Se retorna su PID > 0 en caso de que salga todo bien. En caso de error se retorna 0
 uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
 {
-    //print("Entra a createProcess\n");
     processNode *newProcess = mallocFF(sizeof(processNode) + STACK_SIZE);
-    if (newProcess == NULL)
+    if (newProcess == NULL || (initializeProcess(newProcess, argv[0]) == 0))
     {
         return 0;
     }
-    initializeProcess(newProcess, argv[0]);
-    //print("Sale de initializeProcess\n");
-    //print((char *)newProcess->pcb.pid);
-    print("argc: ");
-    printInt(argc);
     char **args = mallocFF(sizeof(char *) * argc);
     if (args == NULL)
     {
@@ -285,10 +262,7 @@ uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
     }
     copyArguments(args, argv, argc);
     initializeStackFrame(argc, args, newProcess, fn, newProcess->pcb.pid);
-    //print("Sale de initializeStackFrame\n");
     addProcess(newProcess, &currentList);
-    //print(newProcess->pcb.name);
-    // print("Sale de addProcess\n");
     return newProcess->pcb.pid;
 }
 
@@ -319,7 +293,7 @@ uint64_t kill(uint64_t pid)
 
 uint64_t block(uint64_t pid)
 {
-    if(pid<FIRST_PID)
+    if (pid < FIRST_PID)
         return -1;
     int toReturn = changeState(pid, BLOCKED);
     if (pid == currentProcess->pcb.pid)
@@ -331,7 +305,7 @@ uint64_t block(uint64_t pid)
 
 uint64_t unblock(uint64_t pid)
 {
-    if(pid<FIRST_PID)
+    if (pid < FIRST_PID)
         return -1;
     return changeState(pid, READY);
 }
@@ -358,15 +332,12 @@ struct processNode *getProcess(uint64_t pid)
 
 void printProcess(struct processNode *toPrint)
 {
-    char aux[MAX_REGISTER_SIZE + 1];
     printInt(toPrint->pcb.pid);
     print("\t\t\t");
     printInt(toPrint->pcb.priority);
     print("\t\t");
-    //printInt(uintToBase(toPrint->pcb.rsp, aux, 16));
     printHex(toPrint->pcb.rsp);
     print("\t");
-    //printInt(uintToBase(toPrint->pcb.rbp, aux, 16));
     printHex(toPrint->pcb.rbp);
     print("\t");
     print("falta");
@@ -384,19 +355,19 @@ uint64_t ps()
     print("list size ");
     printInt(currentList.size);
     print("\n");
-    if(aux == NULL)
+    if (aux == NULL)
     {
         print("There are no processes to show\n");
         return 0;
     }
-    print("PID      PRIORITY     RSP        RBP        FOREGROUND    STATE      NAME\n");
-
+    //print("PID      PRIORITY     RSP        RBP        FOREGROUND    STATE      NAME\n");
+    print("PID\t\t\tPRIORITY\t\tRSP\tRBP\tFOREGROUND\t\t\tSTATE\tNAME\n");
     while (aux != NULL)
     {
         printProcess(aux);
         aux = aux->next;
-    } 
-    return 1;  
+    }
+    return 1;
 }
 
 uint16_t changeState(uint64_t pid, states newState)
@@ -421,5 +392,22 @@ uint16_t changeState(uint64_t pid, states newState)
     else if (aux->pcb.state == READY && newState != READY)
         currentList.nReady--;
     aux->pcb.state = newState;
+    return 0;
+}
+
+uint64_t nice(uint64_t pid, uint64_t newPriority)
+{
+    if (newPriority <= 0 || newPriority > 12)
+    {
+        print("Wrong priority. Priority is between 1 and 12.\n");
+        return -1;
+    }
+    if (currentProcess->pcb.pid == pid)
+        currentProcess->pcb.priority = newPriority;
+    else
+    {
+        processNode *node = getProcess(pid);
+        node->pcb.priority = newPriority;
+    }
     return 0;
 }
