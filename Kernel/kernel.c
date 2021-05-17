@@ -61,7 +61,7 @@ int main()
 	initializeScheduler();
 	load_idt();
 	char *argv[] = {"./sample"};
-	createProcess(sampleCodeModuleAddress, 1, argv);
+	createProcess(sampleCodeModuleAddress, 1, argv, 1);
 	_sti();
 	_hlt();
 	print("Warning: Out of Kernel.\n");

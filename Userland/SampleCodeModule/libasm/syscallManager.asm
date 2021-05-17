@@ -22,6 +22,7 @@ GLOBAL _ps
 GLOBAL _getPid
 GLOBAL _secondsElapsed
 GLOBAL _nice
+GLOBAL _yield
 SECTION .text
 
 
@@ -115,3 +116,5 @@ _unblock:
 	syscall 18
 _nice:
 	syscall 19
+_yield:
+	syscall 20

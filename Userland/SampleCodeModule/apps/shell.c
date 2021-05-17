@@ -39,12 +39,13 @@ void loadCommands()
     loadCommand(&wkill, "kill", "Kills a running process.\n", TRUE);
     loadCommand(&wblock, "block", "Blocks a running process.\n", TRUE);
     loadCommand(&wunblock, "unblock", "Unlocks a running process.\n", TRUE);
-    loadCommand(&_mem,"mem","Prints the current memory state.\n", TRUE);
+    loadCommand(&_mem, "mem","Prints the current memory state.\n", TRUE);
     loadCommand(&_ps, "ps", "Prints running processes information.\n", TRUE);
     loadCommand(&loop, "loop", "Prints the current process ID and a message.\n", FALSE);
-    loadCommand(&sleep, "sleep","Delay for a specified amount of time.\n", TRUE);
+    loadCommand(&sleep, "sleep", "Delay for a specified amount of time.\n", TRUE);
     loadCommand(&test, "test", "Prints a loop of hello world as a built-in.\n", FALSE);
-    loadCommand(&wnice, "nice", "Changes a process' priority.\n", TRUE); 
+    loadCommand(&wnice, "nice", "Changes a process' priority.\n", TRUE);
+    loadCommand(&_yield, "yield", "The current process resigns to the CPU\n", TRUE);
 }
 
 void loadCommand(void (*fn)(), char *name, char *desc, int builtIn)
@@ -97,8 +98,16 @@ int processInput(char *inputBuffer)
         {
             if (!commands[i].builtIn)
             {
+                context cxt = FOREGROUND;
+                print("context -> fg");
+                if (argSize == 2 && args[1][0] == '&')
+                {
+                    cxt = BACKGROUND;
+                    print("Se cambio a background");
+                }
                 // Se agrega la funcion como un proceso nuevo si no es built-in.
-                int pid = _createProcess(commands[i].command, argSize, args);
+                //int pid = _createProcess(commands[i].command, argSize, args, cxt); PID no se usa
+                _createProcess(commands[i].command, argSize, args, cxt);
             }
             else{
                 commands[i].command(argSize - 1, args + 1);

@@ -105,7 +105,7 @@ void freeFF(void *ap)
     }
 }
 
-uint64_t mem()
+void mem()
 {
     Node *curr;
     char *message1 = "Block: ";
@@ -120,6 +120,4 @@ uint64_t mem()
         printInt(curr->s.size);
         print("\n");
     }
-
-    return 1;
 }

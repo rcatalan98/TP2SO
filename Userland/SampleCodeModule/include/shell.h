@@ -5,7 +5,11 @@
 #define _SHELL_H_
 #include <stdlib.h>
 #include <chess.h>
-
+typedef enum
+{
+    BACKGROUND,
+    FOREGROUND
+} context;
 /**
  * Decidimos usar defines para el tamaño de los chars ya que una syscall seria innecesaria.
  */
@@ -40,7 +44,7 @@ extern void _clearScreen();
 
 extern void _drawFigure(char *toDraw, int color, int size, int x, int y);
 
-extern uint64_t _createProcess(void (*fn)(int, char **), int argc, char **argv);
+extern uint64_t _createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt);
 
 extern void *_mallocFF(uint32_t size);
 
@@ -48,9 +52,9 @@ extern void _freeFF(void *ap);
 
 extern uint64_t _kill(uint64_t pid);
 
-extern uint64_t _mem();
+extern void _mem();
 
-extern uint64_t _ps();
+extern void _ps();
 
 extern uint64_t _unblock(uint64_t pid);
 
@@ -61,6 +65,8 @@ extern uint64_t _getPid();
 extern uint64_t _secondsElapsed();
 
 extern uint64_t _nice(uint64_t pid, uint64_t newPriority);
+
+extern void _yield();
 
 extern void getRegs(int argcount, char *args[]);
 

@@ -49,16 +49,16 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         // void *mallocFF(uint32_t size)
         return (uint64_t)mallocFF(rsi);
     case 10:
-        // void freeFF(void *ap)
-        //falta progamar algo para tema de errores.
+        // void freeFF(void *ap) falta progamar algo para tema de errores.
         freeFF((void *)rsi);
         return 1;
     case 11:
         // uint64_t mem();
-        return mem();
+        mem();
+        return 1;
     case 12:
-        // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv)
-        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx);
+        // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt)
+        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx, (context) r8);
     case 13:
         // uint64_t kill(uint64_t pid);
         return kill((uint64_t)rsi);
@@ -67,7 +67,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         return block((uint64_t)rsi);
     case 15:
         // uint64_t ps();
-        return ps();
+        ps();
+        return 1;
     case 16:
         // uint64_t getPid();
         return getPid();
@@ -80,6 +81,9 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
     case 19:
         // uint64_t nice(uint64_t pid, uint64_t newPriority);
         return nice(rsi, rdx);
+    case 20:
+        yield();
+        return 1;
     default:
         break;
     }
