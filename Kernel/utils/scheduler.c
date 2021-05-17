@@ -399,7 +399,7 @@ uint16_t changeState(uint64_t pid, states newState)
     struct processNode *aux = getProcess(pid);
 
     if (aux == NULL || aux->pcb.state == KILLED)
-        return 20; // No se puede hacer el cambio porque o no encontro el pid o ya esta muerto.
+        return -1; // No se puede hacer el cambio porque o no encontro el pid o ya esta muerto.
 
     if (aux->pcb.state == newState)
         return 1;

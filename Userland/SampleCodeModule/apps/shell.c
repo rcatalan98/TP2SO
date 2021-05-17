@@ -4,7 +4,7 @@
 #include "../include/shell.h"
 
 #define MAX_INPUT 30
-#define MAX_SIZE 20
+#define MAX_SIZE 30
 #define MAX_ARGUMENTS 5
 #define REG_SIZE 17
 #define ESC 27
@@ -39,13 +39,16 @@ void loadCommands()
     loadCommand(&wkill, "kill", "Kills a running process.\n", TRUE);
     loadCommand(&wblock, "block", "Blocks a running process.\n", TRUE);
     loadCommand(&wunblock, "unblock", "Unlocks a running process.\n", TRUE);
-    loadCommand(&_mem, "mem","Prints the current memory state.\n", TRUE);
+    loadCommand(&_mem, "mem", "Prints the current memory state.\n", TRUE);
     loadCommand(&_ps, "ps", "Prints running processes information.\n", TRUE);
     loadCommand(&loop, "loop", "Prints the current process ID and a message.\n", FALSE);
     loadCommand(&sleep, "sleep", "Delay for a specified amount of time.\n", TRUE);
     loadCommand(&test, "test", "Prints a loop of hello world as a built-in.\n", FALSE);
     loadCommand(&wnice, "nice", "Changes a process' priority.\n", TRUE);
-    loadCommand(&_yield, "yield", "The current process resigns to the CPU\n", TRUE);
+    loadCommand(&_yield, "yield", "The current process resigns to the CPU.\n", TRUE);
+    loadCommand(&test_mm, "test_mm", "Function to test the memory manager.\n", FALSE);
+    loadCommand(&test_prio, "test_prio", "Function to test the priority scheduler.\n", FALSE);
+    loadCommand(&test_processes, "test_processes", "Function to test the creation of processes.\n", FALSE);
 }
 
 void loadCommand(void (*fn)(), char *name, char *desc, int builtIn)
@@ -99,7 +102,6 @@ int processInput(char *inputBuffer)
             if (!commands[i].builtIn)
             {
                 context cxt = FOREGROUND;
-                print("context -> fg");
                 if (argSize == 2 && args[1][0] == '&')
                 {
                     cxt = BACKGROUND;
@@ -109,9 +111,10 @@ int processInput(char *inputBuffer)
                 //int pid = _createProcess(commands[i].command, argSize, args, cxt); PID no se usa
                 _createProcess(commands[i].command, argSize, args, cxt);
             }
-            else{
+            else
+            {
                 commands[i].command(argSize - 1, args + 1);
-                }
+            }
             return 1;
         }
     }
@@ -239,13 +242,14 @@ void sleep(int seconds)
 {
     int secondsElapsed = _secondsElapsed();
     int finalTime = seconds + secondsElapsed;
-    while (_secondsElapsed() <= finalTime);
+    while (_secondsElapsed() <= finalTime)
+        ;
 }
 
 void loop()
 {
     int currentPid = _getPid();
-    while(1)
+    while (1)
     {
         sleep(LOOP_TIME);
         print("Soy el proceso: ");
@@ -256,7 +260,7 @@ void loop()
 
 void test()
 {
-    while(1)
+    while (1)
     {
         sleep(LOOP_TIME);
         print("Hello World\n");
@@ -270,7 +274,7 @@ void wblock(int argSize, char *args[])
         print("Wrong amount of parameters\n");
         return;
     }
-    _block(args[0][0] - '0');
+    _block(atoi2(args[0]));
 }
 
 void wkill(int argSize, char *args[])
@@ -280,7 +284,7 @@ void wkill(int argSize, char *args[])
         print("Wrong amount of parameters\n");
         return;
     }
-    _kill(args[0][0] - '0');
+    _kill(atoi2(args[0]));
 }
 
 void wunblock(int argSize, char *args[])
@@ -290,15 +294,15 @@ void wunblock(int argSize, char *args[])
         print("Wrong amount of parameters\n");
         return;
     }
-    _unblock(args[0][0] - '0');
+    _unblock(atoi2(args[0]));
 }
 
 void wnice(int argSize, char *args[])
 {
-    if(argSize != 2)
+    if (argSize != 2)
     {
         print("Wrong amount of parameters\n");
-        return ;
+        return;
     }
-    _nice(args[0][0] - '0', args[1][0] - '0');
+    _nice(atoi2(args[0]), atoi2(args[1]));
 }

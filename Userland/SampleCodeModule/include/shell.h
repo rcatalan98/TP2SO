@@ -4,7 +4,8 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 #include <stdlib.h>
-#include <chess.h>
+#include "chess.h"
+#include "test.h"
 typedef enum
 {
     BACKGROUND,
@@ -61,7 +62,7 @@ extern uint64_t _unblock(uint64_t pid);
 extern uint64_t _block(uint64_t pid);
 
 extern uint64_t _getPid();
-    
+
 extern uint64_t _secondsElapsed();
 
 extern uint64_t _nice(uint64_t pid, uint64_t newPriority);

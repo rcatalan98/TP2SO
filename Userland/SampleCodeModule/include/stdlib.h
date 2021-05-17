@@ -3,8 +3,9 @@
  */
 #ifndef _stdlib_H_
 #define _stdlib_H_
-#include <stdint.h>
-#include <colors.h>
+#define NULL (void *) 0
+#include "stdint.h"
+#include "colors.h"
 /**
  * Funciones a syscall asm.
  */
@@ -59,10 +60,13 @@ void printBase(uint64_t value, uint32_t base);
 
 int pow(int base, unsigned int exp);
 
-uint64_t hexaToInt(char * s);
+uint64_t hexaToInt(char *s);
 
 void numToStr(int num, char *string, int len);
 
 void *memcpy(void *destination, const void *source, uint64_t length);
+
+void *memset(void *destination, int32_t c, uint64_t length);
+int atoi2(char *str);
 
 #endif

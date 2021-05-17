@@ -1,7 +1,7 @@
 /**
  * stdlib.c: Libería estandar del usuario.
  */
-#include <stdlib.h>
+#include "stdlib.h"
 
 static char buffer[64] = {'0'};
 
@@ -75,6 +75,17 @@ void *memcpy(void *destination, const void *source, uint64_t length)
 		for (i = 0; i < length; i++)
 			d[i] = s[i];
 	}
+
+	return destination;
+}
+
+void *memset(void *destination, int32_t c, uint64_t length)
+{
+	uint8_t chr = (uint8_t)c;
+	char *dst = (char *)destination;
+
+	while (length--)
+		dst[length] = chr;
 
 	return destination;
 }
@@ -223,4 +234,22 @@ uint64_t hexaToInt(char *s)
 		rta += c * pow(16, i);
 	}
 	return rta;
+}
+
+int atoi2(char *str)
+{
+	// Initialize result
+	int res = 0;
+
+	// Iterate through all characters
+	// of input string and update result
+	// take ASCII character of corosponding digit and
+	// subtract the code from '0' to get numerical
+	// value and multiply res by 10 to shuffle
+	// digits left to update running total
+	for (int i = 0; str[i] != '\0'; ++i)
+		res = res * 10 + str[i] - '0';
+
+	// return result.
+	return res;
 }
