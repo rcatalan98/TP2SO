@@ -2,6 +2,8 @@ GLOBAL cpuVendor
 GLOBAL getRTC
 GLOBAL getSP
 GLOBAL forceTimer
+GLOBAL _xadd
+GLOBAL _xchg
 section .text
 	
 cpuVendor:
@@ -40,4 +42,14 @@ getSP:
 
 forceTimer:
 	int 20h
+	ret
+
+_xchg:
+	mov rax, rsi
+	xchg [rdi], eax
+	ret
+
+_xadd:
+	mov rax, rdi
+	lock xadd [rsi], eax
 	ret

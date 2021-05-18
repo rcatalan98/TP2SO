@@ -16,7 +16,7 @@ void endless_loop2()
 
   while (1)
   {
-    // printInt(pid);
+    printInt(pid);
     bussy_wait(MINOR_WAIT);
   }
 }

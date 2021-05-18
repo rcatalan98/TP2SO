@@ -15,5 +15,7 @@ char *cpuVendor(char *result);
  */
 int strlen(char *s);
 
+int strcmp(char *s1, char *s2);
+
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 #endif
