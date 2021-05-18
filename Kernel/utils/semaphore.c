@@ -13,7 +13,8 @@ static uint64_t lockSem; // Para bloquear al momento de un open o close de cualq
 static uint64_t findSem(char *name);
 static uint64_t enqeueProcess(uint64_t pid, sem_t *sem);
 static uint64_t dequeueProcess(sem_t *sem);
-//Se inicializa el vector para que todos los lugares esten disponibles
+
+// Se inicializa el vector para que todos los lugares esten disponibles
 void initSems()
 {
     for (int i = 0; i < MAX_SEM; i++)
@@ -31,7 +32,7 @@ static uint64_t findAvailableSpace()
             return i;
         }
     }
-    return -1; //No hay mas espacio en el vector para crear otro semaforo
+    return -1; // No hay mas espacio en el vector para crear otro semaforo
 }
 
 // Retorna la posicion dentro de la estructura donde esta guardado
@@ -50,7 +51,8 @@ static uint64_t createSem(char *name, uint64_t initValue)
     }
     return pos;
 }
-//Retorna un puntero al semaforo al igual que en POSIX. En caso de error retorna NULL
+
+// Retorna un puntero al semaforo al igual que en POSIX. En caso de error retorna NULL
 sem_t *semOpen(char *name, uint64_t initValue)
 {
     while (_xchg(&lockSem, 1) != 0) // esperando a que el lock este disponible
@@ -71,12 +73,13 @@ sem_t *semOpen(char *name, uint64_t initValue)
     _xchg(&lockSem, 0);
     return &semSpaces[semIndex].sem;
 }
-//Retorna -1 en caso de error
-uint64_t semClose(sem_t *sem)
+
+// Retorna -1 en caso de error
+uint64_t semClose(char *name)
 {
     while (_xchg(&lockSem, 1) != 0)
         ;
-    int semIndex = findSem(sem->name);
+    int semIndex = findSem(name);
     if (semIndex == -1)
     {
         return -1; // No se encontro el semaforo pedido.
@@ -85,7 +88,8 @@ uint64_t semClose(sem_t *sem)
     _xchg(&lockSem, 0);
     return 1;
 }
-//Retorna 0 en caso de exito y -1 si fracasa. Blockea el sem.
+
+// Retorna 0 en caso de exito y -1 si fracasa. Blockea el sem.
 uint64_t semWait(sem_t *sem)
 {
     while (_xchg(&sem->lock, 1) != 0)
@@ -96,7 +100,7 @@ uint64_t semWait(sem_t *sem)
         _xchg(&sem->lock, 0);
         return 0;
     }
-    //Si el valor es 0 entonces debo poner al proceso a dormir (encolarlo)
+    // Si el valor es 0 entonces debo poner al proceso a dormir (encolarlo)
     uint64_t pid = getPid();
     if (enqeueProcess(pid, sem) == -1)
     {
@@ -124,7 +128,7 @@ uint64_t semPost(sem_t *sem)
     return 0;
 }
 
-//Retorna -1 en caso de no encontrar el sem
+// Retorna -1 en caso de no encontrar el sem
 static uint64_t findSem(char *name)
 {
     for (int i = 0; i < MAX_SEM; i++)
@@ -137,7 +141,7 @@ static uint64_t findSem(char *name)
     return -1;
 }
 
-//Agrega un proceso a la lista, en caso de fallar retorna -1
+// Agrega un proceso a la lista, en caso de fallar retorna -1
 uint64_t enqeueProcess(uint64_t pid, sem_t *sem)
 {
     process_t *process = mallocFF(sizeof(process_t));

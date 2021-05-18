@@ -1,6 +1,6 @@
 #include "../include/test.h"
 #define MAX_BLOCKS 128
-#define MAX_MEMORY 1024 // Should be around 80% of memory managed by the MM
+#define MAX_MEMORY (1024 * 1024 * 60) // Around 80% of memory managed by the MM (128 Mb)
 
 typedef struct MM_rq
 {
@@ -23,11 +23,12 @@ void test_mm()
     {
       mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
       mm_rqs[rq].address = (void *)_mallocFF(mm_rqs[rq].size); // TODO: Port this call as required
-                                                               //TODO: check if NULL
+                                                               // TODO: check if NULL
       if (mm_rqs[rq].address == NULL)
       {
-        print("total:\n");
+        print("total:");
         printInt(total);
+        print("\n");
         print("Returned Null\n");
       }
       total += mm_rqs[rq].size;

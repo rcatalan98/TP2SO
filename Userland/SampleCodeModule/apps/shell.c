@@ -4,7 +4,7 @@
 #include "../include/shell.h"
 
 #define MAX_INPUT 30
-#define MAX_SIZE 30
+#define MAX_SIZE 40
 #define MAX_ARGUMENTS 5
 #define REG_SIZE 17
 #define ESC 27
@@ -49,6 +49,8 @@ void loadCommands()
     loadCommand(&test_mm, "test_mm", "Function to test the memory manager.\n", FALSE);
     loadCommand(&test_prio, "test_prio", "Function to test the priority scheduler.\n", FALSE);
     loadCommand(&test_processes, "test_processes", "Function to test the creation of processes.\n", FALSE);
+    loadCommand(&test_sync, "test_sync", "Function to test the synchronization of processes with sem.\n", FALSE);
+    loadCommand(&test_no_sync, "test_no_sync", "Function to test the synchronization of processes without sem.\n", FALSE);
 }
 
 void loadCommand(void (*fn)(), char *name, char *desc, int builtIn)
@@ -105,10 +107,9 @@ int processInput(char *inputBuffer)
                 if (argSize == 2 && args[1][0] == '&')
                 {
                     cxt = BACKGROUND;
-                    print("Se cambio a background");
+                    // print("background\n");
                 }
                 // Se agrega la funcion como un proceso nuevo si no es built-in.
-                //int pid = _createProcess(commands[i].command, argSize, args, cxt); PID no se usa
                 _createProcess(commands[i].command, argSize, args, cxt);
             }
             else

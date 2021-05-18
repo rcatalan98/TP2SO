@@ -23,6 +23,10 @@ GLOBAL _getPid
 GLOBAL _secondsElapsed
 GLOBAL _nice
 GLOBAL _yield
+GLOBAL _semWait
+GLOBAL _semPost
+GLOBAL _semClose
+GLOBAL _semOpen
 SECTION .text
 
 
@@ -118,3 +122,11 @@ _nice:
 	syscall 19
 _yield:
 	syscall 20
+_semWait:
+	syscall 21
+_semPost:
+	syscall 22
+_semClose:
+	syscall 23
+_semOpen:
+	syscall 24

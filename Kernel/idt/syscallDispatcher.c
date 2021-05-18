@@ -9,6 +9,7 @@
 #include "../include/time.h"
 #include "../include/memoryManager.h"
 #include "../include/scheduler.h"
+#include "../include/semaphore.h"
 
 uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9)
 {
@@ -58,7 +59,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         return 1;
     case 12:
         // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt)
-        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx, (context) r8);
+        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx, (context)r8);
     case 13:
         // uint64_t kill(uint64_t pid);
         return kill((uint64_t)rsi);
@@ -80,10 +81,22 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         return unblock((uint64_t)rsi);
     case 19:
         // uint64_t nice(uint64_t pid, uint64_t newPriority);
-        return nice(rsi, rdx);
+        return nice((uint64_t)rsi, (uint64_t)rdx);
     case 20:
         yield();
         return 1;
+    case 21:
+        // uint64_t semWait(sem_t *sem);
+        return semWait((void *)rsi);
+    case 22:
+        // uint64_t semPost(sem_t *sem);
+        return semPost((void *)rsi);
+    case 23:
+        // uint64_t semClose(char *name);
+        return semClose((char *)rsi);
+    case 24:
+        // sem_t *semOpen(char *name, uint64_t initValue);
+        return semOpen((char *)rsi, (uint64_t)rdx);
     default:
         break;
     }

@@ -69,6 +69,14 @@ extern uint64_t _nice(uint64_t pid, uint64_t newPriority);
 
 extern void _yield();
 
+extern void *_semOpen(char *name, uint64_t initValue);
+
+extern uint64_t _semClose(char *name);
+
+extern uint64_t _semPost(void *sem);
+
+extern uint64_t _semWait(void *sem);
+
 extern void getRegs(int argcount, char *args[]);
 
 /**
