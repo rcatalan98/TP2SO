@@ -17,7 +17,8 @@ typedef struct
     process_t *lastProcess;  // ultimo proceso esperando en la fila
     uint64_t lock;
     uint64_t value;
-    uint64_t size;
+    uint64_t size; // cantidad de procesos que usan el sem
+    uint64_t sizeList;  // cantidad de procesos bloqueados
 } sem_t;
 extern uint64_t _xchg(uint64_t *lock, uint64_t value);
 void initSems();

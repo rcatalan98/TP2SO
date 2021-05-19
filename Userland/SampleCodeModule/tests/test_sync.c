@@ -1,6 +1,6 @@
 #include "../include/test.h"
 
-#define TOTAL_PAIR_PROCESSES 1
+#define TOTAL_PAIR_PROCESSES 2 //2
 #define SEM_ID "sem"
 
 int64_t global; //shared memory
@@ -46,19 +46,19 @@ void inc(int argc, char *argv[])
 {
   int sem = atoi2(argv[1]);
   int value = atoi2(argv[2]);
-  print("El inc es ");
-  if (value < 0)
-  {
-    print("-");
-    printInt(value * (-1));
-  }
-  else
-  {
-    printInt(value);
-  }
-  print("Para el proceso ");
-  printInt(_getPid());
-  print(".\n");
+  // print("El inc es ");
+  // if (value < 0)
+  // {
+  //   print("-");
+  //   printInt(value * (-1));
+  // }
+  // else
+  // {
+  //   printInt(value);
+  // }
+  // print("Para el proceso ");
+  // printInt(_getPid());
+  // print(".\n");
   int N = atoi2(argv[3]);
   int semIndex;
   uint64_t i;
@@ -68,9 +68,9 @@ void inc(int argc, char *argv[])
     print("ERROR OPENING SEM\n");
     return;
   }
-  print("Mi sem es ");
-  printInt(semIndex);
-  print("\n");
+  //print("Mi sem es ");
+  // printInt(semIndex);
+  // print("\n");
   for (i = 0; i < N; i++)
   {
     if (sem)
@@ -78,7 +78,7 @@ void inc(int argc, char *argv[])
     // print("Soy el proceso: ");
     // printInt(_getPid());
     // print("\n");
-    print("Sali del wait.\n");
+    //print("Sali del wait.\n");
     slowInc(&global, value);
     if (sem)
       _semPost(semIndex);
@@ -109,13 +109,13 @@ void test_sync()
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
   {
-    char *argv1[] = {"inc", "1", "1", "1"};
-    char *argv2[] = {"inc", "1", "-1", "1"};
+    char *argv1[] = {"inc", "1", "1", "2"};
+    char *argv2[] = {"inc", "1", "-1", "2"};
     _createProcess(&inc, 4, argv1, 0);
     _createProcess(&inc, 4, argv2, 0);
   }
   _ps();
-  sleep(20);
+  sleep(2);
   print("FINAL Global value: ");
   if (global < 0)
   {

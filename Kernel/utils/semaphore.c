@@ -39,13 +39,13 @@ static uint64_t findAvailableSpace()
 // Retorna la posicion dentro de la estructura donde esta guardado
 static uint64_t createSem(char *name, uint64_t initValue)
 {
-    print("CREATESEM\n");
-    // Debo buscar el primer lugar disponible en el vector
-    print("En createSem. Soy el proceso ");
-    printInt(getPid());
-    print(" el initValue es ");
-    printInt(initValue);
-    print("\n");
+        // print("CREATESEM\n");
+        // // Debo buscar el primer lugar disponible en el vector
+        // print("En createSem. Soy el proceso ");
+        // printInt(getPid());
+        // print(" el initValue es ");
+        // printInt(initValue);
+        // print("\n");
     uint64_t pos;
     if ((pos = findAvailableSpace()) != -1)
     {
@@ -55,6 +55,8 @@ static uint64_t createSem(char *name, uint64_t initValue)
         semSpaces[pos].sem.lock = 0; // Inicialmente no esta lockeado.
         semSpaces[pos].sem.firstProcess = NULL;
         semSpaces[pos].sem.lastProcess = semSpaces[pos].sem.firstProcess;
+        semSpaces[pos].sem.size = 0;
+        semSpaces[pos].sem.sizeList = 0;
     }
     return pos;
 }
@@ -102,27 +104,27 @@ uint64_t semWait(uint64_t semIndex)
     if (semIndex < 0 || semIndex >= MAX_SEM)
         return -1;
     sem_t *sem = &semSpaces[semIndex].sem;
-    print("Soy el proceso ");
-    printInt(getPid());
-    print("La cantidad de procesos en el sem es: ");
-    printInt(sem->size); // roto
-    print("\n");
-    print("El lock es ");
-    printInt(sem->lock);
+    // print("Soy el proceso ");
+    // printInt(getPid());
+    // print("La cantidad de procesos en el sem es: ");
+    // printInt(sem->size); // roto
+    // print("\n");
+    // print("El lock es ");
+    // printInt(sem->lock);
     while (_xchg(&sem->lock, 1) != 0);
-    print("El lock despues del while es ");
-    printInt(sem->lock);
-    print(" y el value esta en ");
-    if (sem->value < 0)
-    {
-        print("-");
-        printInt(sem->value * (-1));
-    }
-    else
-    {
-        printInt(sem->value);
-    }
-    print(".\n");
+    // print("El lock despues del while es ");
+    // printInt(sem->lock);
+    // print(" y el value esta en: ");
+    // if (sem->value < 0)
+    // {
+    //     print("-");
+    //     printInt(sem->value * (-1));
+    // }
+    // else
+    // {
+    //     printInt(sem->value);
+    // }
+    // print(".\n");
     if (sem->value > 0)
     {
         sem->value--;
@@ -132,9 +134,9 @@ uint64_t semWait(uint64_t semIndex)
     {
         // Si el valor es 0 entonces debo poner al proceso a dormir (encolarlo)
         uint64_t pid = getPid();
-        print("Soy el proceso ");
-        printInt(pid);
-        print("Me estan por bloquear\n");
+        // print("Soy el proceso ");
+        // printInt(pid);
+        // print("Me estan por bloquear\n");
         if (enqeueProcess(pid, sem) == -1)
         {
             _xchg(&sem->lock, 0);
@@ -189,7 +191,7 @@ uint64_t enqeueProcess(uint64_t pid, sem_t *sem)
         return -1;
     }
     process->pid = pid;
-    if (sem->size == 0)
+    if (sem->sizeList == 0)
     {
         sem->firstProcess = process;
         sem->lastProcess = process;
@@ -200,7 +202,7 @@ uint64_t enqeueProcess(uint64_t pid, sem_t *sem)
         process->next = NULL;
         sem->lastProcess = process;
     }
-    sem->size++;
+    sem->sizeList++;
     return 0;
 }
 
@@ -216,5 +218,6 @@ uint64_t dequeueProcess(sem_t *sem)
         sem->lastProcess = NULL;
     }
     freeFF(current);
+    sem->sizeList--;
     return pid;
 }
