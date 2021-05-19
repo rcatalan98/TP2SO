@@ -5,3 +5,15 @@ desktop.ini
 .bash_history
 *.elf
 *.o
+Image/x64BareBonesImage.img
+Bootloader/BMFS/bmfs.bin
+Bootloader/Pure64/bmfs_mbr.sys
+Bootloader/Pure64/pure64.sys
+Bootloader/Pure64/pxestart.sys
+Image/packedKernel.bin
+Image/x64BareBonesImage.qcow2
+Image/x64BareBonesImage.vmdk
+Kernel/kernel.bin
+Toolchain/ModulePacker/mp.bin
+Userland/0000-sampleCodeModule.bin
+Userland/0001-sampleDataModule.bin

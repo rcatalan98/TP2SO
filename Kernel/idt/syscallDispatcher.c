@@ -86,16 +86,16 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         yield();
         return 1;
     case 21:
-        // uint64_t semWait(sem_t *sem);
-        return semWait((void *)rsi);
+        // uint64_t semWait(uint64_t semIndex);
+        return semWait((uint64_t)rsi);
     case 22:
-        // uint64_t semPost(sem_t *sem);
-        return semPost((void *)rsi);
+        // uint64_t semPost(uint64_t semIndex);
+        return semPost((uint64_t)rsi);
     case 23:
         // uint64_t semClose(char *name);
         return semClose((char *)rsi);
     case 24:
-        // sem_t *semOpen(char *name, uint64_t initValue);
+        // uint64_t semOpen(char *name, uint64_t initValue);
         return semOpen((char *)rsi, (uint64_t)rdx);
     default:
         break;

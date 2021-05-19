@@ -29,6 +29,7 @@ static uint64_t findAvailableSpace()
     {
         if (semSpaces[i].available == TRUE)
         {
+            semSpaces[i].available = FALSE;
             return i;
         }
     }
@@ -38,7 +39,13 @@ static uint64_t findAvailableSpace()
 // Retorna la posicion dentro de la estructura donde esta guardado
 static uint64_t createSem(char *name, uint64_t initValue)
 {
+    print("CREATESEM\n");
     // Debo buscar el primer lugar disponible en el vector
+    print("En createSem. Soy el proceso ");
+    printInt(getPid());
+    print(" el initValue es ");
+    printInt(initValue);
+    print("\n");
     uint64_t pos;
     if ((pos = findAvailableSpace()) != -1)
     {
@@ -47,31 +54,31 @@ static uint64_t createSem(char *name, uint64_t initValue)
         semSpaces[pos].sem.value = initValue;
         semSpaces[pos].sem.lock = 0; // Inicialmente no esta lockeado.
         semSpaces[pos].sem.firstProcess = NULL;
-        semSpaces[pos].sem.lastProcess = NULL;
+        semSpaces[pos].sem.lastProcess = semSpaces[pos].sem.firstProcess;
     }
     return pos;
 }
 
 // Retorna un puntero al semaforo al igual que en POSIX. En caso de error retorna NULL
-sem_t *semOpen(char *name, uint64_t initValue)
+uint64_t semOpen(char *name, uint64_t initValue)
 {
     while (_xchg(&lockSem, 1) != 0) // esperando a que el lock este disponible
         ;
     // Primero me fijo si ya existe el sem por nombre
     // Si no existe debo crear el sem por primera vez
     int semIndex = findSem(name);
-    if (semIndex == -1) //Si no existe el sem, hay que crearlo
+    if (semIndex == -1) // Si no existe el sem, hay que crearlo
     {
         semIndex = createSem(name, initValue);
         if (semIndex == -1)
         {
             _xchg(&lockSem, 0);
-            return NULL; // No habia mas lugar para crear sem.
+            return -1; // No habia mas lugar para crear sem.
         }
     }
     semSpaces[semIndex].sem.size++;
     _xchg(&lockSem, 0);
-    return &semSpaces[semIndex].sem;
+    return semIndex; // Retornamos el indice del sem.
 }
 
 // Retorna -1 en caso de error
@@ -90,30 +97,62 @@ uint64_t semClose(char *name)
 }
 
 // Retorna 0 en caso de exito y -1 si fracasa. Blockea el sem.
-uint64_t semWait(sem_t *sem)
+uint64_t semWait(uint64_t semIndex)
 {
-    while (_xchg(&sem->lock, 1) != 0)
-        ;
+    if (semIndex < 0 || semIndex >= MAX_SEM)
+        return -1;
+    sem_t *sem = &semSpaces[semIndex].sem;
+    print("Soy el proceso ");
+    printInt(getPid());
+    print("La cantidad de procesos en el sem es: ");
+    printInt(sem->size); // roto
+    print("\n");
+    print("El lock es ");
+    printInt(sem->lock);
+    while (_xchg(&sem->lock, 1) != 0);
+    print("El lock despues del while es ");
+    printInt(sem->lock);
+    print(" y el value esta en ");
+    if (sem->value < 0)
+    {
+        print("-");
+        printInt(sem->value * (-1));
+    }
+    else
+    {
+        printInt(sem->value);
+    }
+    print(".\n");
     if (sem->value > 0)
     {
         sem->value--;
         _xchg(&sem->lock, 0);
-        return 0;
     }
-    // Si el valor es 0 entonces debo poner al proceso a dormir (encolarlo)
-    uint64_t pid = getPid();
-    if (enqeueProcess(pid, sem) == -1)
+    else
     {
+        // Si el valor es 0 entonces debo poner al proceso a dormir (encolarlo)
+        uint64_t pid = getPid();
+        print("Soy el proceso ");
+        printInt(pid);
+        print("Me estan por bloquear\n");
+        if (enqeueProcess(pid, sem) == -1)
+        {
+            _xchg(&sem->lock, 0);
+            return -1;
+        }
+        
         _xchg(&sem->lock, 0);
-        return -1;
+        block(pid);
+        sem->value--;
     }
-    block(pid);
-    _xchg(&sem->lock, 0);
     return 0;
 }
 
-uint64_t semPost(sem_t *sem)
+uint64_t semPost(uint64_t semIndex)
 {
+    if (semIndex < 0 || semIndex >= MAX_SEM)
+        return -1;
+    sem_t *sem = &semSpaces[semIndex].sem;
     while (_xchg(&sem->lock, 1) != 0)
         ;
     sem->value++;
@@ -133,7 +172,7 @@ static uint64_t findSem(char *name)
 {
     for (int i = 0; i < MAX_SEM; i++)
     {
-        if (strcmp(name, semSpaces[i].sem.name) == 0)
+        if (semSpaces[i].available == FALSE && strcmp(name, semSpaces[i].sem.name))
         {
             return i;
         }

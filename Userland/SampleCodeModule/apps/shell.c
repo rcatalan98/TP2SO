@@ -151,7 +151,7 @@ void help()
         printWithColor(commands[i].name, YELLOW);
         print(": ");
         print(commands[i].description);
-        putChar('\n');
+        // putChar('\n');
     }
 }
 

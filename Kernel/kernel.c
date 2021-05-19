@@ -12,6 +12,7 @@
 #include <exceptions.h>
 #include <memoryManager.h>
 #include <scheduler.h>
+#include "include/semaphore.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -59,6 +60,7 @@ int main()
 	initialStateSnapshot((uint64_t)sampleCodeModuleAddress, getSP());
 	initializeMem(heapBaseAddress, HEAP_SIZE);
 	initializeScheduler();
+	initSems();
 	load_idt();
 	char *argv[] = {"./sample"};
 	createProcess(sampleCodeModuleAddress, 1, argv, 1);
