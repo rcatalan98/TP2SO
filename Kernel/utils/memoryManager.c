@@ -1,3 +1,4 @@
+#ifndef BUDDY_MM
 #include "../include/memoryManager.h"
 #define BLOCK_SIZE sizeof(Node)
 #define BLOCK_AMOUNT (baseSize / BLOCK_SIZE)
@@ -121,3 +122,4 @@ void mem()
         print("\n");
     }
 }
+#endif

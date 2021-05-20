@@ -1,12 +1,16 @@
-#include "../include/circularList.h"
+/**
+ * Source: https://github.com/evanw/buddy-malloc/blob/master/buddy-malloc.c
+ */
+#include "../include/list.h"
 
-static void listInit(list_t *list)
+void listInit(list_t *list)
 {
     list->prev = list;
     list->next = list;
+    list->occupied = 1;
 }
 
-static void listPush(list_t *list, list_t *entry)
+void listPush(list_t *list, list_t *entry)
 {
     list_t *prev = list->prev;
     entry->prev = prev;
@@ -15,7 +19,7 @@ static void listPush(list_t *list, list_t *entry)
     list->prev = entry;
 }
 
-static void listRemove(list_t *entry)
+void listRemove(list_t *entry)
 {
     list_t *prev = entry->prev;
     list_t *next = entry->next;
@@ -23,11 +27,16 @@ static void listRemove(list_t *entry)
     next->prev = prev;
 }
 
-static list_t *listPop(list_t *list)
+list_t *listPop(list_t *list)
 {
     list_t *back = list->prev;
     if (back == list)
         return NULL;
     listRemove(back);
     return back;
+}
+
+int isEmpty(list_t *list)
+{
+    return list->prev==list;
 }

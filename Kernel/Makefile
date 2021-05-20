@@ -1,5 +1,6 @@
 include Makefile.inc
-
+# FREELIST_MM o BUDDY_MM
+MM=-D FREELIST_MM
 KERNEL=kernel.bin
 SOURCES=$(wildcard *.c)
 SOURCES_LIBASM=$(wildcard libasm/*.asm)
@@ -26,7 +27,7 @@ $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_LIBASM) $(OBJECTS_
 	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_LIBASM) $(OBJECTS_LIBC) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IDT) $(OBJECTS_UTILS)
 	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_LIBASM) $(OBJECTS_LIBC) $(STATICLIBS) $(OBJECTS_DRIVERS) $(OBJECTS_IDT) $(OBJECTS_UTILS)
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -I./drivers -I./idt -I./libc -c $< -o $@
+	$(GCC) $(GCCFLAGS) $(MM) -I./include -I./drivers -I./idt -I./libc -c $< -o $@
 
 %.o : %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
