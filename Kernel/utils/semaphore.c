@@ -164,7 +164,7 @@ uint64_t semPost(uint64_t semIndex)
         _xchg(&sem->lock, 0);
         return -1;
     }
-    unblock(pid);
+    unblock(pid) ? : forceTimer();
     _xchg(&sem->lock, 0);
     return 0;
 }

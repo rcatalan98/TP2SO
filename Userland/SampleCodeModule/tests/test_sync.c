@@ -109,25 +109,25 @@ void test_sync()
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
   {
-    char *argv1[] = {"inc", "1", "1", "2"};
-    char *argv2[] = {"inc", "1", "-1", "2"};
+    char *argv1[] = {"inc", "1", "1", "30"};
+    char *argv2[] = {"inc", "1", "-1", "30"};
     _createProcess(&inc, 4, argv1, 0);
     _createProcess(&inc, 4, argv2, 0);
   }
-  _ps();
-  sleep(2);
-  print("FINAL Global value: ");
-  if (global < 0)
-  {
-    print("-");
-    printInt(global * (-1));
-  }
-  else
-  {
-    printInt(global);
-  }
-  print("\n");
-  print("Termino test_sync\n");
+  // _ps();
+  // sleep(2);
+  // print("FINAL Global value: ");
+  // if (global < 0)
+  // {
+  //   print("-");
+  //   printInt(global * (-1));
+  // }
+  // else
+  // {
+  //   printInt(global);
+  // }
+  // print("\n");
+  // print("Termino test_sync\n");
 }
 
 void test_no_sync()
