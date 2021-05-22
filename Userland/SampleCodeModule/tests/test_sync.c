@@ -1,7 +1,8 @@
 #include "../include/test.h"
 
-#define TOTAL_PAIR_PROCESSES 1
+#define TOTAL_PAIR_PROCESSES 2
 #define SEM_ID "sem"
+#define ITER "100"
 
 int64_t global; //shared memory
 int64_t currentPid;
@@ -70,7 +71,8 @@ void inc(int argc, char *argv[])
   // print("\n");
   for (i = 0; i < N; i++)
   {
-    if (sem){
+    if (sem)
+    {
       // print("Soy el proceso: ");
       // printInt(_getPid());
       // print(" estoy por entrar al wait\n");
@@ -84,8 +86,9 @@ void inc(int argc, char *argv[])
     // printInt(_getPid());
     // print(" sali del slowInc");
     // print("\n");
-    if (sem){
-      if(_semPost(semIndex)==-1)
+    if (sem)
+    {
+      if (_semPost(semIndex) == -1)
         print("Error en el post");
     }
     // print("Soy el proceso: ");
@@ -119,13 +122,13 @@ void test_sync()
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
   {
-    char *argv1[] = {"inc", "1", "1", "500"};
-    char *argv2[] = {"inc", "1", "-1", "500"};
+    char *argv1[] = {"inc", "1", "1", ITER};
+    char *argv2[] = {"inc", "1", "-1", ITER};
     _createProcess(&inc, 4, argv1, 0);
     _createProcess(&inc, 4, argv2, 0);
   }
+  // sleep(atoi2(ITER));
   // _ps();
-  // sleep(2);
   // print("FINAL Global value: ");
   // if (global < 0)
   // {
@@ -150,8 +153,8 @@ void test_no_sync()
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
   {
-    char *argv1[] = {"inc", "0", "1", "100"}; // 100000
-    char *argv2[] = {"inc", "0", "-1", "100"};
+    char *argv1[] = {"inc", "0", "1", ITER}; // 100000
+    char *argv2[] = {"inc", "0", "-1", ITER};
     _createProcess(&inc, 4, argv1, 0);
     _createProcess(&inc, 4, argv2, 0);
   }
