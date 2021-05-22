@@ -23,7 +23,6 @@ void slowInc(int64_t *p, int64_t inc)
   // }
   // print("\n");
   aux += inc;
-  _yield();
   *p = aux;
   // print("Soy el proceso: ");
   // printInt(_getPid());
@@ -94,6 +93,7 @@ void inc(int argc, char *argv[])
     // print("Soy el proceso: ");
     // printInt(_getPid());
     // print(" sali del post\n");
+     _yield();
   }
   if (sem)
     _semClose(SEM_ID);
@@ -120,10 +120,11 @@ void test_sync()
 
   print("CREATING PROCESSES...(WITH SEM)\n");
 
+   char *argv1[] = {"inc", "1", "1", ITER};
+   char *argv2[] = {"inc", "1", "-1", ITER};
+  
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
   {
-    char *argv1[] = {"inc", "1", "1", ITER};
-    char *argv2[] = {"inc", "1", "-1", ITER};
     _createProcess(&inc, 4, argv1, 0);
     _createProcess(&inc, 4, argv2, 0);
   }
