@@ -18,7 +18,7 @@ enum state
 };
 
 static phylo_t phylos[MAX_PHYL];
-static uint64_t chopstick[MAX_PHYL];
+// static uint64_t chopstick[MAX_PHYL];
 static int seated;
 uint64_t sem;
 
@@ -47,7 +47,7 @@ void phylo(int argc, char **argv)
         case 'A':
             if(addPhylo(seated) == -1)
             {
-                print("Error at addPhylo en phylo\n");
+                print("Error adding philosopher\n");
                 return ;
             }
             break;
@@ -55,7 +55,7 @@ void phylo(int argc, char **argv)
         case 'R':
             if(removePhylo(seated) == -1)
             {
-                print("Error at removePhylo en phylo\n");
+                print("Error adding philosopher\n");
                 return ;
             }
             break;
@@ -69,8 +69,8 @@ static int addPhylo(int i)
 {
     if(i > MAX_PHYL || i < MIN_PHYL)
         return -1;
-    semWait(sem);
-    
+    _semWait(sem);
+
     return 0;
 }
 
