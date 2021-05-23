@@ -58,9 +58,9 @@ void *initializeKernelBinary()
 int main()
 {
 	initialStateSnapshot((uint64_t)sampleCodeModuleAddress, getSP());
+	initSems();
 	initializeMem(heapBaseAddress, HEAP_SIZE);
 	initializeScheduler();
-	initSems();
 	load_idt();
 	char *argv[] = {"./sample"};
 	createProcess(sampleCodeModuleAddress, 1, argv, 1);

@@ -12,6 +12,11 @@
 t_command commands[MAX_SIZE];
 static int sizeC = 0;
 void test();
+void cat(int argSize, char *args[]);
+void wc(int argSize, char *args[]);
+void filter(int argSize, char *args[]);
+static int isVowel(char c);
+
 void intializeShell()
 {
     char input[MAX_INPUT];
@@ -46,6 +51,9 @@ void loadCommands()
     loadCommand(&test, "test", "Prints a loop of hello world as a built-in.\n", FALSE);
     loadCommand(&wnice, "nice", "Changes a process' priority.\n", TRUE);
     loadCommand(&_yield, "yield", "The current process resigns to the CPU.\n", TRUE);
+    loadCommand((void *)&cat, "cat", "Prints entered text.\n", FALSE);
+    loadCommand((void *)&wc, "wc", "Prints word count of the entered text.\n", FALSE);
+    loadCommand(&filter, "filter", "Filters the vowels of the entered text.\n", FALSE);
     loadCommand(&test_mm, "test_mm", "Function to test the memory manager.\n", FALSE);
     loadCommand(&test_prio, "test_prio", "Function to test the priority scheduler.\n", FALSE);
     loadCommand(&test_processes, "test_processes", "Function to test the creation of processes.\n", FALSE);
@@ -306,4 +314,44 @@ void wnice(int argSize, char *args[])
         return;
     }
     _nice(atoi2(args[0]), atoi2(args[1]));
+}
+
+void cat(int argSize, char *args[])
+{
+    char c;
+    while ((c = getChar()) != 0)
+        putChar(c);
+}
+
+void wc(int argSize, char *args[])
+{
+    int lines = 0;
+    char c;
+    while ((c = getChar()) != 0)
+    {
+        if (c == '\n')
+            lines++;
+    }
+    print("Amount of lines: ");
+    printInt(lines);
+    print("\n");
+}
+
+void filter(int argSize, char *args[])
+{
+    char c;
+    while ((c = _sGetChar()) != 0)
+    {
+        if (!isVowel(c))
+            print(&c);
+    }
+    return;
+}
+
+static int isVowel(char c)
+{
+    return (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
+            c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U')
+               ? 1
+               : 0;
 }

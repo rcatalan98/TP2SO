@@ -147,11 +147,11 @@ uint64_t semPost(uint64_t semIndex)
             _xchg(&sem->lock, 0);
             return -1;
         }
-        int unblockValue = unblock(pid);
-        if (unblockValue != -1)
-        {
-            forceTimer();
-        }
+        // int unblockValue = unblock(pid);
+        // if (unblockValue != -1)
+        // {
+        //     forceTimer();
+        // }
     }
     unblock(pid) ? : forceTimer();
     _xchg(&sem->lock, 0);

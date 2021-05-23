@@ -5,9 +5,9 @@
 #include "scheduler.h"
 #define MAX_NAME 10
 #define MAX_SEM 10
-typedef struct processNode
+typedef struct pNode
 {
-    struct processNode *next;
+    struct pNode *next;
     uint64_t pid;
 } process_t;
 typedef struct

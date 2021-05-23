@@ -23,7 +23,7 @@ void slowInc(int64_t *p, int64_t inc)
   // }
   // print("\n");
   aux += inc;
-  _yield();
+  // _yield();
   *p = aux;
   // print("Soy el proceso: ");
   // printInt(_getPid());
@@ -94,6 +94,7 @@ void inc(int argc, char *argv[])
     // print("Soy el proceso: ");
     // printInt(_getPid());
     // print(" sali del post\n");
+    _yield();
   }
   if (sem)
     _semClose(SEM_ID);

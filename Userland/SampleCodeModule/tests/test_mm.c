@@ -17,8 +17,6 @@ void test_mm()
   {
     rq = 0;
     total = 0;
-    printWithColor("PRE MALLOC\n", GREEN);
-    _mem();
     // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < MAX_MEMORY)
     {
@@ -35,8 +33,6 @@ void test_mm()
       total += mm_rqs[rq].size;
       rq++;
     }
-    printWithColor("POST MALLOC, PRE FREE\n", GREEN);
-    _mem();
     // Set
     uint32_t i;
     for (i = 0; i < rq; i++)
@@ -44,21 +40,15 @@ void test_mm()
         memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
 
     // Check
-    int k = 0;
     for (i = 0; i < rq; i++)
       if (mm_rqs[i].address != NULL)
         if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
         {
-          printInt(++k);
           printWithColor(" ERROR!\n", RED); // TODO: Port this call as required
         }
-    printWithColor("Iteraciones: ",GREEN);
-    printInt(i);
     // Free
     for (i = 0; i < rq; i++)
       if (mm_rqs[i].address != NULL)
         _freeFF(mm_rqs[i].address); // TODO: Port this call as required
-    printWithColor("\nPOST FREE\n", GREEN);
-    _mem();
   }
 }

@@ -1,6 +1,7 @@
 #ifndef FREELIST_MM
 #include "../include/memoryManager.h"
 #include "../include/list.h"
+#include "../include/semaphore.h"
 #define MIN_ALLOC_LOG2 6                     // 64 bytes
 #define MAX_ALLOC_LOG2 (30 - MIN_ALLOC_LOG2) // 1Gb max alloc
 #define BIN_POW(x) (1 << (x))
@@ -19,8 +20,16 @@ static uint64_t log2(uint64_t n);
 static uint64_t isPowerOfTwo(int n);
 static list_t *getAdress(list_t *node);
 
+static int mutex;
+
 void initializeMem(void *baseAllocation, uint32_t bSize)
 {
+    mutex = semOpen("mutex", 1);
+    if (mutex == -1)
+    {
+        return;
+    }
+
     if (baseAllocation == NULL)
     {
         return;
@@ -45,7 +54,6 @@ void initializeMem(void *baseAllocation, uint32_t bSize)
 
 void *mallocFF(uint32_t size)
 {
-    print("/");
     if (size == 0)
         return NULL;
     uint64_t totalSize;
@@ -53,9 +61,13 @@ void *mallocFF(uint32_t size)
         return NULL;
 
     uint64_t bucketLevel = getBucketLevel(totalSize);
+    semWait(mutex);
     uint64_t freeBucketLevel;
     if ((freeBucketLevel = getFreeBucketLevel(bucketLevel)) == -1)
+    {
+        semPost(mutex);
         return NULL;
+    }
     list_t *node;
     for (node = listPop(&buckets[freeBucketLevel]); bucketLevel < freeBucketLevel; freeBucketLevel--)
     {
@@ -63,8 +75,8 @@ void *mallocFF(uint32_t size)
         addBucket(&buckets[freeBucketLevel - 1], getBuddy(node), freeBucketLevel - 1);
     }
     node->occupied = 1;
+    semPost(mutex);
     availableMem -= BIN_POW(MIN_ALLOC_LOG2 + bucketLevel);
-    print(";\n");
     return (void *)++node;
 }
 
@@ -72,8 +84,8 @@ void freeFF(void *ap)
 {
     if (ap == NULL)
         return;
-    print("-");
     list_t *list = (list_t *)ap - 1;
+    semWait(mutex);
     list->occupied = 0;
     availableMem += BIN_POW(MIN_ALLOC_LOG2 + list->bucketLevel);
 
@@ -86,7 +98,7 @@ void freeFF(void *ap)
         buddy = getBuddy(list);
     }
     listPush(&buckets[list->bucketLevel], list);
-    print(".\n");
+    semPost(mutex);
 }
 
 void mem()
