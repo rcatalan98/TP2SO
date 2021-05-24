@@ -2,7 +2,7 @@
 
 #define TOTAL_PAIR_PROCESSES 2
 #define SEM_ID "sem"
-#define ITER "100"
+#define ITER "10"
 
 int64_t global; //shared memory
 int64_t currentPid;
@@ -23,7 +23,7 @@ void slowInc(int64_t *p, int64_t inc)
   // }
   // print("\n");
   aux += inc;
-  // _yield();
+  _yield();
   *p = aux;
   // print("Soy el proceso: ");
   // printInt(_getPid());
@@ -94,7 +94,7 @@ void inc(int argc, char *argv[])
     // print("Soy el proceso: ");
     // printInt(_getPid());
     // print(" sali del post\n");
-    _yield();
+   // _yield();
   }
   if (sem)
     _semClose(SEM_ID);

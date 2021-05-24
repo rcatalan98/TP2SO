@@ -16,11 +16,11 @@ typedef struct
     process_t *firstProcess; // primer proceso esperando (waiting) en la fila
     process_t *lastProcess;  // ultimo proceso esperando en la fila
     uint64_t lock;
-    uint64_t value;
+    int value;
     uint64_t size; // cantidad de procesos que usan el sem
     uint64_t sizeList;  // cantidad de procesos bloqueados
 } sem_t;
-extern uint64_t _xchg(uint64_t *lock, uint64_t value);
+extern uint64_t _xchg(uint64_t *lock, int value);
 void initSems();
 uint64_t semOpen(char *name, uint64_t initValue);
 uint64_t semClose(char *name);

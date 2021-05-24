@@ -48,6 +48,8 @@ typedef struct pcb_t
     uint64_t tickets;
     states state;
     context context; // 1 -> FOREGROUND, 0 -> BACKGROUND
+    uint64_t fdIn;
+    uint64_t fdOut;
 } pcb_t;
 typedef struct processNode
 {
@@ -150,13 +152,22 @@ uint64_t scheduler(uint64_t rsp)
 {
     // Tengo que fijarme si hay algun proceso corriendo. Si no es asi debo elegir uno de la lista con estado READY.
     // Si hay algun proceso debo hacer el switch context y chequear el tema del timeslot
+    // print("La cantidad de ready es: ");
+    // printInt(currentList.nReady);
+    // print("\n");
     if (currentProcess == NULL)
     {
-        if (isEmpty(&currentList))
-            return rsp;
-        currentProcess = removeProcess(&currentList);
-        currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
-        addProcess(currentProcess, &currentList);
+        if (isEmpty(&currentList)){
+            currentProcess = dummyProcess;
+            currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
+            //return rsp;
+        }
+        else
+        {
+            currentProcess = removeProcess(&currentList);
+            currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
+            addProcess(currentProcess, &currentList);
+        }
     }
     else
     {
@@ -166,6 +177,12 @@ uint64_t scheduler(uint64_t rsp)
             currentProcess = findNextReady(&currentList);
             currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
             addProcess(currentProcess, &currentList);
+        }
+        else if (currentList.nReady <= 0)
+        {
+            //print("Cambiando al dummy\n");
+            currentProcess = dummyProcess;
+            currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
         }
     }
     //addProcess(currentProcess, &currentList);
@@ -186,6 +203,8 @@ static uint64_t initializeProcess(processNode *node, char *name, context cxt)
     pcb->priority = INIT_PRIORITY;
     pcb->tickets = INIT_PRIORITY * QUANTUM;
     pcb->context = cxt;
+    pcb->fdIn = 0; // Falta chequear si es NULL el vector que recibimos de fd y cambiarlo.
+    pcb->fdOut = 0;
     return pcb->pid;
 }
 
@@ -393,6 +412,10 @@ uint16_t changeState(uint64_t pid, states newState)
     {
         if (currentProcess->pcb.state == newState)
             return 1;
+        if (currentProcess->pcb.state != READY && newState == READY)
+            currentList.nReady++;
+        else if (currentProcess->pcb.state == READY && newState != READY)
+            currentList.nReady--;
         currentProcess->pcb.state = newState;
         return 0;
     }
@@ -427,4 +450,13 @@ uint64_t nice(uint64_t pid, uint64_t newPriority)
         node->pcb.priority = newPriority;
     }
     return 0;
+}
+
+uint64_t getFdIn(){
+    return currentProcess->pcb.fdIn;
+}
+
+uint64_t getFdOut()
+{
+    return currentProcess->pcb.fdOut;
 }

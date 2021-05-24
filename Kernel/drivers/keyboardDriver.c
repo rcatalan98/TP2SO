@@ -1,11 +1,11 @@
 /**
  * Driver de teclado, llamado del metodo getKey() desde syscall 4.
 */
-#include <keyboardDriver.h>
+#include "../include/keyboardDriver.h"
 #define IS_LOWER_CASE(n) ((n) >= 'a' && (n) <= 'z')
 
-#include <videoDriver.h>
-#include <stdio.h>
+
+
 
 void putInBuffer(char c);
 char keyToAscii(int scancode);
@@ -21,7 +21,15 @@ static uint64_t shift = 0;
 static uint64_t capsLock = 0;
 static unsigned int bsize = 0;
 static char keyBuffer[MAX_SIZE];
-
+static int semId  = 0;
+int initializeKeyboard()
+{
+    if((semId = semOpen("semKey", 0)) == -1){
+        print("Error opening sem in Keyboard");
+        return -1;
+    }
+    return 0;
+}
 int keyboard_handler()
 {
     int scanCode;
@@ -38,6 +46,9 @@ int keyboard_handler()
         if (scanCode >= 0 && scanCode < KEYS && pressCodes[scanCode][0] != 0)
         {
             putInBuffer(keyToAscii(scanCode));
+            //print("antes del semPost\n");
+            semPost(semId);
+            //print("despues del semPost\n");
             return 1;
         }
     }
@@ -59,6 +70,10 @@ char keyToAscii(int scancode)
 
 char sGetChar()
 {
+    // print("antes del semWait\n");
+    if(semWait(semId)==-1)
+        print("Error en el semWait");
+    // print("despues del semWait\n");
     if (bsize <= 0)
     {
         return 0;

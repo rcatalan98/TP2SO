@@ -24,4 +24,6 @@ uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context 
 void ps();
 uint64_t nice(uint64_t pid, uint64_t newPriority);
 void yield();
+uint64_t getFdIn();// fdIn del current
+uint64_t getFdOut();// fdOut del current
 #endif

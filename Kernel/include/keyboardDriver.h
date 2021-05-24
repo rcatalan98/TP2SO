@@ -1,7 +1,9 @@
 #ifndef __keyboardDriver_H_
 #define __keyboardDriver_H_
-#include <stdint.h>
-#include <font.h>
+#include "stdint.h"
+#include "font.h"
+#include "videoDriver.h"
+#include "semaphore.h"
 #define SHIFT1 42
 #define SHIFT2 54
 #define SHIFT1_FREE (SHIFT1 + 128)
@@ -23,6 +25,10 @@ int keyboard_handler();
  * Retorna la tecla presionada del buffer, se lo llama desde syscalls.
 */
 char sGetChar();
+/**
+ * Inicializa el sem necesario para el funcionamiento bloqueante del sGetChar. La idea es un semWait antes de pedir y un semPost al llegar una tecla.
+*/
+int initializeKeyboard();
 /**
  * Detecta si hay un codigo de teclado en el buffer.
  */

@@ -97,12 +97,24 @@ uint64_t semWait(uint64_t semIndex)
     if (semIndex < 0 || semIndex >= MAX_SEM)
         return -1;
     sem_t *sem = &semSpaces[semIndex].sem;
- 
+    
     while (_xchg(&sem->lock, 1) != 0);
-
+    // print("name sem: ");
+    // print(sem->name);
+    // print("\n");
+    // print("Value: ");
+    // printInt(sem->value);
+    // print("\n");
+    
     if (sem->value > 0)
     {
+        // print("Antes Value: ");
+        // printInt(sem->value);
+        // print("\n");
         sem->value--;
+        // print("Despues Value: ");
+        // printInt(sem->value);
+        // print("\n");
         _xchg(&sem->lock, 0);
     }
     else
@@ -116,10 +128,13 @@ uint64_t semWait(uint64_t semIndex)
         }
         
         _xchg(&sem->lock, 0);
-        if(block(pid)== -1){
+        //print("Antes del block\n");
+        if (block(pid) == -1)
+        {
             print("Error en el block");
             return -1;
         }
+       //print("Despues del block\n");
         sem->value--;
     }
     return 0;
@@ -153,8 +168,8 @@ uint64_t semPost(uint64_t semIndex)
         //     forceTimer();
         // }
     }
+    _xchg(&sem->lock, 0);//OJO CON ESTE CAMBIO 
     unblock(pid) ? : forceTimer();
-    _xchg(&sem->lock, 0);
     return 0;
 }
 

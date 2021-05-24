@@ -13,6 +13,7 @@
 #include <memoryManager.h>
 #include <scheduler.h>
 #include "include/semaphore.h"
+#include "../include/pipe.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -60,10 +61,14 @@ int main()
 	initialStateSnapshot((uint64_t)sampleCodeModuleAddress, getSP());
 	initSems();
 	initializeMem(heapBaseAddress, HEAP_SIZE);
+	//initPipes();
+	initializeKeyboard();
 	initializeScheduler();
 	load_idt();
-	char *argv[] = {"./sample"};
-	createProcess(sampleCodeModuleAddress, 1, argv, 1);
+	print("termino el initK\n");
+	// char *argv[] = {"./sample"};
+	// createProcess(sampleCodeModuleAddress, 1, argv, 1);
+	((EntryPoint)sampleCodeModuleAddress)();
 	_sti();
 	_hlt();
 	print("Warning: Out of Kernel.\n");
