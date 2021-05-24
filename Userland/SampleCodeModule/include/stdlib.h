@@ -67,6 +67,9 @@ void numToStr(int num, char *string, int len);
 void *memcpy(void *destination, const void *source, uint64_t length);
 
 void *memset(void *destination, int32_t c, uint64_t length);
+
 int atoi2(char *str);
+
+char *strcat(char *destination, const char *source);
 
 #endif

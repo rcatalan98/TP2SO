@@ -1,6 +1,5 @@
 #include "../include/scheduler.h"
 #include "../include/stdio.h" // Para debugging.
-#define MAX_NAME 20
 #define STACK_SIZE 4 * 1024
 #define PROCESS_SIZE (8 * 1024 - sizeof(proccessNode)) // 8 KB
 #define FIRST_PID 1

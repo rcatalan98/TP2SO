@@ -248,7 +248,8 @@ int atoi2(char *str)
 	// value and multiply res by 10 to shuffle
 	// digits left to update running total
 	int flag = (str[0] == '-' ? -1 : 1);
-	if(flag == -1){
+	if (flag == -1)
+	{
 		str++;
 	}
 	for (int i = 0; str[i] != '\0'; ++i)
@@ -256,4 +257,22 @@ int atoi2(char *str)
 
 	// return result.
 	return res * flag;
+}
+
+char *strcat(char *destination, const char *source)
+{
+	// make `ptr` point to the end of the destination string
+	char *ptr = destination + strlen(destination);
+
+	// appends characters of the source to the destination string
+	while (*source != '\0')
+	{
+		*ptr++ = *source++;
+	}
+
+	// null terminate destination string
+	*ptr = '\0';
+
+	// the destination is returned by standard `strcat()`
+	return destination;
 }

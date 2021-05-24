@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "chess.h"
 #include "test.h"
+#include "phylo.h"
 typedef enum
 {
     BACKGROUND,

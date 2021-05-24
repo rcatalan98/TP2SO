@@ -84,6 +84,7 @@ uint64_t semClose(char *name)
     int semIndex = findSem(name);
     if (semIndex == -1)
     {
+        print("Wrong semIndex\n");
         return -1; // No se encontro el semaforo pedido.
     }
     semSpaces[semIndex].sem.size--;

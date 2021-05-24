@@ -54,6 +54,7 @@ void loadCommands()
     loadCommand((void *)&cat, "cat", "Prints entered text.\n", FALSE);
     loadCommand((void *)&wc, "wc", "Prints word count of the entered text.\n", FALSE);
     loadCommand(&filter, "filter", "Filters the vowels of the entered text.\n", FALSE);
+    loadCommand(&phylo, "phylo", "Play the philosophers dilema.\n", FALSE);
     loadCommand(&test_mm, "test_mm", "Function to test the memory manager.\n", FALSE);
     loadCommand(&test_prio, "test_prio", "Function to test the priority scheduler.\n", FALSE);
     loadCommand(&test_processes, "test_processes", "Function to test the creation of processes.\n", FALSE);
@@ -114,11 +115,11 @@ int processInput(char *inputBuffer)
                 context cxt = FOREGROUND;
                 if (argSize == 2 && args[1][0] == '&')
                 {
-                    cxt = BACKGROUND;       
+                    cxt = BACKGROUND;
                     // print("background\n");
                 }
-                    // Se agrega la funcion como un proceso nuevo si no es built-in.
-                    _createProcess(commands[i].command, argSize, args, cxt);
+                // Se agrega la funcion como un proceso nuevo si no es built-in.
+                _createProcess(commands[i].command, argSize, args, cxt);
             }
             else
             {

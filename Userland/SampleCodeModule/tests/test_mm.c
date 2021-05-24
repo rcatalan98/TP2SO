@@ -1,6 +1,6 @@
 #include "../include/test.h"
 #define MAX_BLOCKS 128
-#define MAX_MEMORY (1024 * 1024 * 128 * 0.7) // Around 80% of memory managed by the MM (128 Mb)
+#define MAX_MEMORY (1024 * 1024 * 128 * 0.8) // Around 80% of memory managed by the MM (128 Mb)
 
 typedef struct MM_rq
 {
