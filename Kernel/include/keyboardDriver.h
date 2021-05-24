@@ -4,6 +4,7 @@
 #include "font.h"
 #include "videoDriver.h"
 #include "semaphore.h"
+#include "pipe.h"
 #define SHIFT1 42
 #define SHIFT2 54
 #define SHIFT1_FREE (SHIFT1 + 128)

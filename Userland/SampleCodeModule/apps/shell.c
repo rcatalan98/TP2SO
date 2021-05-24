@@ -114,11 +114,11 @@ int processInput(char *inputBuffer)
                 context cxt = FOREGROUND;
                 if (argSize == 2 && args[1][0] == '&')
                 {
-                    cxt = BACKGROUND;
+                    cxt = BACKGROUND;       
                     // print("background\n");
                 }
-                // Se agrega la funcion como un proceso nuevo si no es built-in.
-                _createProcess(commands[i].command, argSize, args, cxt);
+                    // Se agrega la funcion como un proceso nuevo si no es built-in.
+                    _createProcess(commands[i].command, argSize, args, cxt);
             }
             else
             {
@@ -331,6 +331,9 @@ void wc(int argSize, char *args[])
     {
         if (c == '\n')
             lines++;
+        print("Amount of lines: ");
+        printInt(lines);
+        print("\n");
     }
     print("Amount of lines: ");
     printInt(lines);
@@ -340,7 +343,7 @@ void wc(int argSize, char *args[])
 void filter(int argSize, char *args[])
 {
     char c;
-    while ((c = _sGetChar()) != 0)
+    while ((c = getChar()) != 0)
     {
         if (!isVowel(c))
             print(&c);

@@ -28,6 +28,7 @@ uint64_t writeChar(uint64_t pipeIndex, char c);
 //Retorna -1 en caso de error y 0 en caso contrario.
 uint64_t initPipes()
 {
+    print("init pipes");
     if ((semPipeManager = semOpen("Pipe Manager", 1)) == -1)
     {
         print("Error en initPipe");
@@ -45,7 +46,7 @@ uint64_t pipeOpen(char *name)
 {
     if (semWait(semPipeManager))
     {
-        print("Error semWait en pipeClose\n");
+        print("Error semWait en pipeOpen\n");
         return -1;
     }
     //Busco si existe un pipe en nuestra estructura de datos

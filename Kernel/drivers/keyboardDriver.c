@@ -9,6 +9,7 @@
 
 void putInBuffer(char c);
 char keyToAscii(int scancode);
+static char getCharK();
 
 /** 
  *  Matriz que representa los ASCII del teclado, en primer lugar se encuentran
@@ -45,10 +46,17 @@ int keyboard_handler()
             capsLock = !capsLock;
         if (scanCode >= 0 && scanCode < KEYS && pressCodes[scanCode][0] != 0)
         {
-            putInBuffer(keyToAscii(scanCode));
-            //print("antes del semPost\n");
-            semPost(semId);
-            //print("despues del semPost\n");
+            char c = keyToAscii(scanCode);
+            int fdOut = getFdOut();
+            if(fdOut > 0){
+                writePipe(fdOut, &c);
+            }else{
+                //print("antes del semPost\n");
+                putInBuffer(c);
+                semPost(semId);
+                //print("despues del semPost\n");
+            }
+            
             return 1;
         }
     }
@@ -70,10 +78,21 @@ char keyToAscii(int scancode)
 
 char sGetChar()
 {
+    char c;
     // print("antes del semWait\n");
-    if(semWait(semId)==-1)
-        print("Error en el semWait");
     // print("despues del semWait\n");
+    int fd = getFdIn();
+    if (fd > 0){
+        c = readPipe(fd);
+    }else{
+        if (semWait(semId) == -1)
+            print("Error en el semWait");
+        c = getCharK();
+    }
+    return c;
+}
+
+static char getCharK(){
     if (bsize <= 0)
     {
         return 0;

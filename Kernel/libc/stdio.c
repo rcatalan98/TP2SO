@@ -26,9 +26,7 @@ void blinkCursor()
 {
     drawCursor(x * CHAR_WIDTH, y * CHAR_HEIGHT, blink = !blink, cursorColor);
 }
-
-void putchar(char c, int color)
-{
+void atomicPutChar(char c, int color){
     switch (c)
     {
     case '\n':
@@ -44,6 +42,15 @@ void putchar(char c, int color)
         // Se debe ver si saltar de linea o quedarse en la misma.
         drawChar(x * CHAR_WIDTH, y * CHAR_HEIGHT, c, FONT_SIZE, color, BLACK);
         ((x += FONT_SIZE) > width) ? enter() : setCursor(x, y, cursorColor);
+    }
+}
+void putchar(char c, int color)
+{
+    int fd = getFdOut();
+    if(fd > 0){
+        writePipe(fd, &c);
+    }else{
+        atomicPutChar(c, color);
     }
 }
 

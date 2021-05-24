@@ -124,6 +124,7 @@ uint64_t semWait(uint64_t semIndex)
         if (enqeueProcess(pid, sem) == -1)
         {
             _xchg(&sem->lock, 0);
+            print("Error enqeue");
             return -1;
         }
         

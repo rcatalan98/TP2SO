@@ -3,8 +3,9 @@
  */ 
 #ifndef __stdio_H_
 #define __stdio_H_
-#include <videoDriver.h>
-#include <lib.h>
+#include "pipe.h"
+#include "videoDriver.h"
+#include "lib.h"
 #define FONT_SIZE 1
 /**
  * Define una nueva posicón valida para el cursor y lo vuelve a dibujar.

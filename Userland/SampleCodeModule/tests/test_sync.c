@@ -1,8 +1,8 @@
 #include "../include/test.h"
 
-#define TOTAL_PAIR_PROCESSES 2
+#define TOTAL_PAIR_PROCESSES 3
 #define SEM_ID "sem"
-#define ITER "10"
+#define ITER "44"
 
 int64_t global; //shared memory
 int64_t currentPid;

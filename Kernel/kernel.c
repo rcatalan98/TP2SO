@@ -61,13 +61,12 @@ int main()
 	initialStateSnapshot((uint64_t)sampleCodeModuleAddress, getSP());
 	initSems();
 	initializeMem(heapBaseAddress, HEAP_SIZE);
-	//initPipes();
+	initPipes();
 	initializeKeyboard();
 	initializeScheduler();
 	load_idt();
-	print("termino el initK\n");
 	// char *argv[] = {"./sample"};
-	// createProcess(sampleCodeModuleAddress, 1, argv, 1);
+	// createProcess(sampleCodeModuleAddress, 1, argv, 1); // complica el caso donde tenemos la lista de readys vacia
 	((EntryPoint)sampleCodeModuleAddress)();
 	_sti();
 	_hlt();
