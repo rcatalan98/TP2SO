@@ -46,7 +46,7 @@ extern void _clearScreen();
 
 extern void _drawFigure(char *toDraw, int color, int size, int x, int y);
 
-extern uint64_t _createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt);
+extern uint64_t _createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt, int fd[2]);
 
 extern void *_mallocFF(uint32_t size);
 
@@ -77,6 +77,14 @@ extern uint64_t _semClose(char *name);
 extern uint64_t _semPost(uint64_t semIndex);
 
 extern uint64_t _semWait(uint64_t semIndex);
+
+extern uint64_t _pipeOpen(char *name);
+
+extern uint64_t _pipeClose(uint64_t pipeIndex);
+
+extern uint64_t _writePipe(uint64_t pipeIndex, char *string);
+
+extern char _readPipe(uint64_t pipeIndex);
 
 extern void getRegs(int argcount, char *args[]);
 

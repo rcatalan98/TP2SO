@@ -118,16 +118,15 @@ uint64_t writeChar(uint64_t pipeIndex, char c)
     if (!indexValid(pipeIndex))
         return -1;
 
-    pipe_t pipe = pipes[pipeIndex - 1].pipe;
-
-    if (semWait(pipe.semWrite) == -1)
+    pipe_t * pipe = &pipes[pipeIndex - 1].pipe;
+    if (semWait(pipe->semWrite) == -1)
     {
         print("Error semWait en writeChar\n");
         return -1;
     }
-    pipe.buffer[pipe.wIndex % BUFFER_SIZE] = c;
-    pipe.wIndex++;
-    if (semPost(pipe.semWrite) == -1)
+    pipe->buffer[pipe->wIndex % BUFFER_SIZE] = c;
+    pipe->wIndex++;
+    if (semPost(pipe->semRead) == -1)
     {
         print("Error semPost en writeChar\n");
         return -1;
@@ -140,15 +139,15 @@ char readPipe(uint64_t pipeIndex)
     if (!indexValid(pipeIndex))
         return -1;
 
-    pipe_t pipe = pipes[pipeIndex - 1].pipe;
-    if (semWait(pipe.semRead) == -1)
+    pipe_t * pipe = &pipes[pipeIndex - 1].pipe;
+    if (semWait(pipe->semRead) == -1)
     {
         print("Error semWait en readPipe\n");
         return -1;
     }
-    char c = pipe.buffer[pipe.rIndex % BUFFER_SIZE];
-    pipe.rIndex--;
-    if (semPost(pipe.semRead) == -1)
+    char c = pipe->buffer[pipe->rIndex % BUFFER_SIZE];
+    pipe->rIndex++;
+    if (semPost(pipe->semWrite) == -1)
     {
         print("Error semPost en readPipe\n");
         return -1;
@@ -187,9 +186,16 @@ static uint64_t createPipe(char *name)
         memcpy(newPipe->name, name, len);
         newPipe->rIndex = 0;
         newPipe->wIndex = 0;
-
-        uint64_t semRead = semOpen("semRead", 1);
-        uint64_t semWrite = semOpen("semWrite", 1);
+        char nameR[MAX_NAME];
+        memcpy(nameR, name, len);
+        nameR[len] = 'R';
+        nameR[len + 1] = 0;
+        uint64_t semRead = semOpen(nameR, 0);
+        char nameW[MAX_NAME];
+        memcpy(nameW, name, len);
+        nameW[len] = 'W';
+        nameR[len + 1] = 0;
+        uint64_t semWrite = semOpen(nameW, BUFFER_SIZE);
         if (semRead == -1 || semWrite == -1)
         {
             print("PipeOpen: Error en los sem del pipe");

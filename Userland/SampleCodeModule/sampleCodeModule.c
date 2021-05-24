@@ -6,6 +6,6 @@
 int main()
 {
 	char *argv[] = {"Shell"};
-	_createProcess(&intializeShell, 1, argv, 1);
+	_createProcess(&intializeShell, 1, argv, 1, NULL);
 	return 0;
 }

@@ -37,7 +37,7 @@ void test_processes()
     for (rq = 0; rq < MAX_PROCESSES; rq++)
     {
       char *argv[] = {"endless_loop"};
-      p_rqs[rq].pid = _createProcess(&endless_loop, 1, argv, 0); //// TODO: Port this call as required
+      p_rqs[rq].pid = _createProcess(&endless_loop, 1, argv, 0, NULL); //// TODO: Port this call as required
       
       printInt(p_rqs[rq].pid);
       print("\n");

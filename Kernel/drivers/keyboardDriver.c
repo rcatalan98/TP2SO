@@ -44,6 +44,12 @@ int keyboard_handler()
             shift = 0;
         else if (scanCode == CAPS_LOCK)
             capsLock = !capsLock;
+        else if (shift && capsLock)
+        {
+            // printError2("Por matar el fg...\n");
+            killFg();
+            return 1;
+        }
         if (scanCode >= 0 && scanCode < KEYS && pressCodes[scanCode][0] != 0)
         {
             char c = keyToAscii(scanCode);

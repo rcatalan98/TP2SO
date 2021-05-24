@@ -116,5 +116,16 @@ void printHex(uint64_t value)
 {
     printBase(value, 16);
 }
-
-
+uint64_t sWritePriv(char *buffer, int size, int color)
+{
+    while (size-- && *buffer != 0)
+    {
+        atomicPutChar(*buffer, color);
+        buffer++;
+    }
+    return size == 0;
+}
+void printError2(char *string)
+{
+    sWritePriv(string, strlen(string), RED);
+}

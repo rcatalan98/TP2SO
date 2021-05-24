@@ -81,7 +81,7 @@ void phylo(int argc, char **argv)
             endTable();
             if (_semClose(SEM_PHYL) == -1)
                 printWithColor("Error closing main semaphore in Phylo.\n", RED);
-            _unblock(2);
+            // _unblock(2);
             return;
         }
     }
@@ -111,7 +111,7 @@ static int addPhylo(int pIndex)
     uintToBase(seated, currSeated, 10);
     char *argv[] = {"phi", currSeated};
     phylos[pIndex].state = THINKING;
-    if ((phylos[pIndex].pid = _createProcess(&phyloProcess, 2, argv, BACKGROUND)) == 0) //TODO Cambiar al implementar pipes
+    if ((phylos[pIndex].pid = _createProcess(&phyloProcess, 2, argv, BACKGROUND, NULL)) == 0) //TODO Cambiar al implementar pipes
     {
         printWithColor("Error creating philosopher process", RED);
         return -1;

@@ -20,10 +20,11 @@ uint64_t block(uint64_t pid);
 uint64_t unblock(uint64_t pid);
 uint64_t kill(uint64_t pid);
 uint64_t scheduler(uint64_t rsp);
-uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt);
+uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt, int fd[2]);
 void ps();
 uint64_t nice(uint64_t pid, uint64_t newPriority);
 void yield();
 uint64_t getFdIn();  // fdIn del current
 uint64_t getFdOut(); // fdOut del current
+uint64_t killFg();
 #endif

@@ -27,6 +27,10 @@ GLOBAL _semWait
 GLOBAL _semPost
 GLOBAL _semClose
 GLOBAL _semOpen
+GLOBAL _pipeOpen
+GLOBAL _pipeClose
+GLOBAL _readPipe
+GLOBAL _writePipe
 SECTION .text
 
 
@@ -130,3 +134,11 @@ _semClose:
 	syscall 23
 _semOpen:
 	syscall 24
+_pipeOpen:
+	syscall 25
+_pipeClose:
+	syscall 26
+_readPipe:
+	syscall 27
+_writePipe:
+	syscall 28

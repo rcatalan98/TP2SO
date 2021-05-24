@@ -84,10 +84,10 @@ uint64_t semClose(char *name)
     int semIndex = findSem(name);
     if (semIndex == -1)
     {
-        print("Wrong semIndex\n");
         return -1; // No se encontro el semaforo pedido.
     }
-    semSpaces[semIndex].sem.size--;
+    if ((semSpaces[semIndex].sem.size--) <= 0)
+        semSpaces[semIndex].available = TRUE;
     _xchg(&lockSem, 0);
     return 1;
 }
@@ -98,15 +98,16 @@ uint64_t semWait(uint64_t semIndex)
     if (semIndex < 0 || semIndex >= MAX_SEM)
         return -1;
     sem_t *sem = &semSpaces[semIndex].sem;
-    
-    while (_xchg(&sem->lock, 1) != 0);
+
+    while (_xchg(&sem->lock, 1) != 0)
+        ;
     // print("name sem: ");
     // print(sem->name);
     // print("\n");
     // print("Value: ");
     // printInt(sem->value);
     // print("\n");
-    
+
     if (sem->value > 0)
     {
         // print("Antes Value: ");
@@ -125,18 +126,18 @@ uint64_t semWait(uint64_t semIndex)
         if (enqeueProcess(pid, sem) == -1)
         {
             _xchg(&sem->lock, 0);
-            print("Error enqeue");
+            // print("Error enqeue");
             return -1;
         }
-        
+
         _xchg(&sem->lock, 0);
         //print("Antes del block\n");
         if (block(pid) == -1)
         {
-            print("Error en el block");
+            // print("Error en el block");
             return -1;
         }
-       //print("Despues del block\n");
+        //print("Despues del block\n");
         sem->value--;
     }
     return 0;
@@ -144,34 +145,39 @@ uint64_t semWait(uint64_t semIndex)
 
 uint64_t semPost(uint64_t semIndex)
 {
-    if (semIndex < 0 || semIndex >= MAX_SEM){
-        print("Error index menor a 0 o mayor a max_sem\n");
+    if (semIndex < 0 || semIndex >= MAX_SEM)
+    {
+        // print("Error index menor a 0 o mayor a max_sem\n");
         return -1;
     }
-        
+
     sem_t *sem = &semSpaces[semIndex].sem;
-    if(sem == NULL){
-        print("Error sem es NULL\n");
+    if (sem == NULL)
+    {
+        // print("Error sem es NULL\n");
+        return -1;
     }
     while (_xchg(&sem->lock, 1) != 0)
         ;
     sem->value++;
     int pid;
-    if (sem->sizeList > 0){
+    if (sem->sizeList > 0)
+    {
         if ((pid = dequeueProcess(sem)) == -1)
         {
-            print("Error al sacar de la lista un proceso\n ");
+            // print("Error al sacar de la lista un proceso\n ");
             _xchg(&sem->lock, 0);
             return -1;
         }
+        // unblock(pid);
         // int unblockValue = unblock(pid);
         // if (unblockValue != -1)
         // {
         //     forceTimer();
         // }
     }
-    _xchg(&sem->lock, 0);//OJO CON ESTE CAMBIO 
-    unblock(pid) ? : forceTimer();
+    _xchg(&sem->lock, 0);
+    unblock(pid) ?: forceTimer();
     return 0;
 }
 

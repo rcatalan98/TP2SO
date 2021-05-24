@@ -125,8 +125,8 @@ void test_sync()
   {
     char *argv1[] = {"inc", "1", "1", ITER};
     char *argv2[] = {"inc", "1", "-1", ITER};
-    _createProcess(&inc, 4, argv1, 0);
-    _createProcess(&inc, 4, argv2, 0);
+    _createProcess(&inc, 4, argv1, 0, NULL);
+    _createProcess(&inc, 4, argv2, 0, NULL);
   }
   // sleep(atoi2(ITER));
   // _ps();
@@ -156,7 +156,7 @@ void test_no_sync()
   {
     char *argv1[] = {"inc", "0", "1", ITER}; // 100000
     char *argv2[] = {"inc", "0", "-1", ITER};
-    _createProcess(&inc, 4, argv1, 0);
-    _createProcess(&inc, 4, argv2, 0);
+    _createProcess(&inc, 4, argv1, 0, NULL);
+    _createProcess(&inc, 4, argv2, 0, NULL);
   }
 }

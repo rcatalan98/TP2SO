@@ -31,7 +31,7 @@ void test_prio()
   for (i = 0; i < TOTAL_PROCESSES; i++)
   {
     char *argv[] = {"endless_loop"};
-    pids[i] = _createProcess(&endless_loop2, 1, argv, 0); //En caso de ejecutar el test como background va a devolver error porque un bg no puede crear un fg
+    pids[i] = _createProcess(&endless_loop2, 1, argv, 0, NULL); //En caso de ejecutar el test como background va a devolver error porque un bg no puede crear un fg
   }
   bussy_wait(WAIT);
   print("\nCHANGING PRIORITIES...\n");

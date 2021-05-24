@@ -118,8 +118,40 @@ int processInput(char *inputBuffer)
                     cxt = BACKGROUND;
                     // print("background\n");
                 }
-                // Se agrega la funcion como un proceso nuevo si no es built-in.
-                _createProcess(commands[i].command, argSize, args, cxt);
+                if (argSize == 3 && args[1][0] == '|')
+                {
+                    //crear proceso wc y cat con fd correspondientes
+                    print("Entramos");
+                    int pipeId = _pipeOpen("cat&wc");
+                    if (pipeId == -1)
+                    {
+                        print("Error pipeOpen");
+                    }
+                    print("Se creo el pipe ");
+                    printInt(pipeId);
+                    print("\n");
+                    int fd[2] = {pipeId, 0};
+                    char *aux[1] = {"filter"};
+                    int pid;
+                    if ((pid = _createProcess(&filter, 1, aux, BACKGROUND, fd)) == 0)
+                        print("Error createProcess\n");
+                    print("Se creo el pid ");
+                    printInt(pid);
+                    print("\n");
+                    aux[0] = "cat";
+                    fd[0] = 0;
+                    fd[1] = pipeId;
+                    if ((pid = _createProcess(&cat, 1, aux, FOREGROUND, fd)) == 0)
+                        print("Error createProcess\n");
+                    print("Se creo el pid ");
+                    printInt(pid);
+                    print("\n");
+                }
+                else
+                {
+                    // Se agrega la funcion como un proceso nuevo si no es built-in.
+                    _createProcess(commands[i].command, argSize, args, cxt, NULL);
+                }
             }
             else
             {

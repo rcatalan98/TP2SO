@@ -68,7 +68,7 @@ static processNode *currentProcess;
 static processNode *dummyProcess;
 static uint64_t pidCounter = 1;
 
-static uint64_t initializeProcess(processNode *process, char *name, context cxt);
+static uint64_t initializeProcess(processNode *node, char *name, context cxt, int fd[2]);
 static void addProcess(struct processNode *nodeToAdd, struct processList *list);
 static struct processNode *removeProcess(struct processList *list);
 static int isEmpty(struct processList *list);
@@ -77,6 +77,7 @@ struct processNode *getProcess(uint64_t pid);
 static void exitProcess();
 uint16_t changeState(uint64_t pid, states newState);
 static uint64_t getNewPid();
+uint64_t searchForForegroundKill();
 
 static void copyArguments(char **d, char **from, int amount)
 {
@@ -120,7 +121,7 @@ void initializeScheduler()
     currentProcess = NULL;
     // Agregamos como primer proceso el dummy.
     char *argv[] = {"dummyProcess"};
-    createProcess((void *)&dummyP, 1, argv, 1);
+    createProcess((void *)&dummyP, 1, argv, 1, NULL);
     dummyProcess = removeProcess(&currentList);
 }
 
@@ -132,9 +133,10 @@ static processNode *findNextReady(struct processList *list)
         if (toReturn->pcb.state == KILLED)
         {
             // Si el proceso era fg -> desbloqueo al padre.
-            if(toReturn -> pcb.context == FOREGROUND){
-                struct processNode * parent = getProcess(toReturn->pcb.ppid);
-                if(parent != NULL)
+            if (toReturn->pcb.context == FOREGROUND)
+            {
+                struct processNode *parent = getProcess(toReturn->pcb.ppid);
+                if (parent != NULL)
                     unblock(parent->pcb.pid);
             }
             // Hacemos el free del proceso.
@@ -150,16 +152,13 @@ static processNode *findNextReady(struct processList *list)
 uint64_t scheduler(uint64_t rsp)
 {
     // Tengo que fijarme si hay algun proceso corriendo. Si no es asi debo elegir uno de la lista con estado READY.
-    // Si hay algun proceso debo hacer el switch context y chequear el tema del timeslot
-    // print("La cantidad de ready es: ");
-    // printInt(currentList.nReady);
-    // print("\n");
+    // Si hay algun proceso debo hacer el switch context y chequear el tema del timeslot.
     if (currentProcess == NULL)
     {
-        if (isEmpty(&currentList)){
+        if (isEmpty(&currentList))
+        {
             currentProcess = dummyProcess;
             currentProcess->pcb.tickets = currentProcess->pcb.priority * QUANTUM;
-            //return rsp;
         }
         else
         {
@@ -190,7 +189,7 @@ uint64_t scheduler(uint64_t rsp)
 }
 
 // Funcion auxiliar para la creacion del PCB.
-static uint64_t initializeProcess(processNode *node, char *name, context cxt)
+static uint64_t initializeProcess(processNode *node, char *name, context cxt, int fd[2])
 {
     pcb_t *pcb = &(node->pcb);
     pcb->pid = getNewPid();
@@ -202,8 +201,21 @@ static uint64_t initializeProcess(processNode *node, char *name, context cxt)
     pcb->priority = INIT_PRIORITY;
     pcb->tickets = INIT_PRIORITY * QUANTUM;
     pcb->context = cxt;
-    pcb->fdIn = 0; // Falta chequear si es NULL el vector que recibimos de fd y cambiarlo.
-    pcb->fdOut = 0;
+    if (fd == NULL)
+    {
+        pcb->fdIn = 0;
+        pcb->fdOut = 0;
+    }
+    else
+    {
+        if (fd[0] == 0 && cxt == BACKGROUND)
+        {
+            return 0;
+        }
+        pcb->fdIn = fd[0];
+        pcb->fdOut = fd[1];
+    }
+
     return pcb->pid;
 }
 
@@ -269,29 +281,38 @@ static struct processNode *removeProcess(struct processList *list)
 }
 
 // Se crea un nuevo proceso creando el pcb y el stackframe que le corresponde. Se retorna su PID > 0 en caso de que salga todo bien. En caso de error se retorna 0
-uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt)
+uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt, int fd[2])
 {
+    //print("Creando el proceso...\n");
     if (currentProcess != NULL && currentProcess->pcb.context == BACKGROUND && cxt == FOREGROUND)
     {
         return 0;
     }
+    //print("Alocando mem para el proceso...\n");
     processNode *newProcess = mallocFF(sizeof(processNode) + STACK_SIZE);
-    if (newProcess == NULL || (initializeProcess(newProcess, argv[0], cxt) == 0))
+    //print("Initializando el proceso...\n");
+    if (newProcess == NULL || (initializeProcess(newProcess, argv[0], cxt, fd) == 0))
     {
         return 0;
     }
+    //print("Asignando mem para args...\n");
     char **args = mallocFF(sizeof(char *) * argc);
     if (args == NULL)
     {
         return 0;
     }
+    //print("Copiando args...\n");
     copyArguments(args, argv, argc);
+    //print("Init stackFrame...\n");
     initializeStackFrame(argc, args, newProcess, fn, newProcess->pcb.pid);
+    //print("Aniadieno el proceso...\n");
     addProcess(newProcess, &currentList);
     if (newProcess->pcb.context == FOREGROUND && newProcess->pcb.ppid > 0)
     { // Chequear esta condicion.
+        //print("Bloqueando al padre...\n");
         block(newProcess->pcb.ppid);
     }
+    //print("Proceso creado.\n");
     return newProcess->pcb.pid;
 }
 
@@ -319,7 +340,7 @@ static void exitProcess()
 
 // Retorna 0 en caso de exito, -1 si existe algun tipo de error tal como en linux.
 uint64_t kill(uint64_t pid)
-{
+{  
     uint16_t done = changeState(pid, KILLED);
     if (pid == currentProcess->pcb.pid)
         forceTimer();
@@ -413,8 +434,11 @@ uint16_t changeState(uint64_t pid, states newState)
             return 1;
         if (currentProcess->pcb.state != READY && newState == READY)
             currentList.nReady++;
-        else if (currentProcess->pcb.state == READY && newState != READY)
+        else if (currentProcess->pcb.state == READY && newState != READY){
+            if (newState == KILLED && currentProcess->pcb.context == FOREGROUND && currentProcess->pcb.ppid > 0)
+                unblock(currentProcess->pcb.ppid);
             currentList.nReady--;
+            }
         currentProcess->pcb.state = newState;
         return 0;
     }
@@ -429,7 +453,11 @@ uint16_t changeState(uint64_t pid, states newState)
     if (aux->pcb.state != READY && newState == READY)
         currentList.nReady++;
     else if (aux->pcb.state == READY && newState != READY)
+    {
+        if (newState == KILLED && aux->pcb.context == FOREGROUND && aux->pcb.ppid > 0)
+            unblock(aux->pcb.ppid);
         currentList.nReady--;
+    }
     aux->pcb.state = newState;
     return 0;
 }
@@ -451,11 +479,36 @@ uint64_t nice(uint64_t pid, uint64_t newPriority)
     return 0;
 }
 
-uint64_t getFdIn(){
+uint64_t getFdIn()
+{
     return currentProcess->pcb.fdIn;
 }
 
 uint64_t getFdOut()
 {
     return currentProcess->pcb.fdOut;
+}
+//Busca el primer proceso foreground en ready y lo mata.
+uint64_t searchForForegroundKill()
+{
+    processNode *aux = currentList.first;
+    while (aux != NULL)
+    {
+        if (aux->pcb.context == FOREGROUND && aux->pcb.ppid > 0)
+        {
+            unblock(aux->pcb.ppid);
+            return kill(aux->pcb.pid);
+        }
+
+        aux = aux->next;
+    }
+    return -1; //No encontro proceso con las caract.
+}
+uint64_t killFg()
+{
+    if (currentProcess != NULL && currentProcess != dummyProcess && currentProcess->pcb.context == FOREGROUND && currentProcess->pcb.state == READY)
+    {
+        return kill(currentProcess->pcb.pid);
+    }
+    return searchForForegroundKill();
 }

@@ -58,8 +58,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         mem();
         return 1;
     case 12:
-        // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt)
-        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx, (context)r8);
+        // uint64_t createProcess(void (*fn)(int, char **), int argc, char **argv, context cxt, int fd[2])
+        return createProcess((void (*)(int, char **))rsi, (int)rdx, (char **)rcx, (context)r8, (int *)r9);
     case 13:
         // uint64_t kill(uint64_t pid);
         return kill((uint64_t)rsi);
@@ -97,6 +97,14 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
     case 24:
         // uint64_t semOpen(char *name, uint64_t initValue);
         return semOpen((char *)rsi, (uint64_t)rdx);
+    case 25:
+        return pipeOpen((char *)rsi);
+    case 26:
+        return pipeClose((uint64_t)rsi);
+    case 27:
+        return readPipe((uint64_t)rsi);
+    case 28:
+        return writePipe((uint64_t)rsi, (char *)rdx);
     default:
         break;
     }
