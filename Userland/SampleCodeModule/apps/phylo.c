@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/phylo.h"
 
 #define MAX_PHYL 15
@@ -93,7 +95,7 @@ void phylo(int argc, char **argv)
  */
 static int addPhylo(int pIndex)
 {
-    if (pIndex > MAX_PHYL || pIndex < 0)
+    if (pIndex >= MAX_PHYL || pIndex < 0)
     {
         return -1;
     }
@@ -192,7 +194,7 @@ void update(int pIndex)
  */
 static int removePhylo(int pIndex)
 {
-    if (pIndex > MAX_PHYL || pIndex < MIN_PHYL)
+    if (pIndex >= MAX_PHYL || pIndex <= MIN_PHYL)
         return -1;
     _semWait(sem);
     seated--;
@@ -201,7 +203,7 @@ static int removePhylo(int pIndex)
         printWithColor("Error in closing phylo's sem.\n", RED);
     if (_kill(phylos[pIndex].pid) == -1)
         printWithColor("Error in killing phylo process.\n", RED);
-    if (eats && pIndex)
+    if (eats)
     {
         update(pIndex - 1);
         update(0);

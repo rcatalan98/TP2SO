@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/pipe.h"
 
 typedef struct
@@ -37,7 +39,7 @@ uint64_t initPipes()
         print("Error en initPipe");
         return -1;
     }
-    for (int i = 0; i < MAX_SEM; i++)
+    for (int i = 0; i < MAX_PIPES; i++)
     {
         pipes[i].available = TRUE;
     }
@@ -60,13 +62,13 @@ uint64_t pipeOpen(char *name)
         //Si no existe un pipe con ese nombre
         id = createPipe(name);
     }
-    pipes[id - 1].pipe.amountProcesses++;
     if (id == -1)
     {
         print("Error en pipeOpen, id=-1\n");
         semPost(semPipeManager);
         return -1;
     }
+    pipes[id - 1].pipe.amountProcesses++;
     if (semPost(semPipeManager))
     {
         print("Error semPost en pipeClose\n");
@@ -163,7 +165,7 @@ char readPipe(uint64_t pipeIndex)
 static uint64_t findPipe(char *name)
 {
 
-    for (int i = 0; i < MAX_SEM; i++)
+    for (int i = 0; i < MAX_PIPES; i++)
     {
         if (pipes[i].available == FALSE && strcmp(name, pipes[i].pipe.name))
         {
@@ -177,7 +179,7 @@ static uint64_t findPipe(char *name)
 static uint64_t createPipe(char *name)
 {
     int len = strlen(name);
-    if (len <= 0 || len >= MAX_NAME)
+    if (len <= 0 || len >= MAX_NAME-1)
     {
         print("createPipe: Nombre demasiado largo\n");
         return -1;
@@ -198,7 +200,7 @@ static uint64_t createPipe(char *name)
         char nameW[MAX_NAME];
         memcpy(nameW, name, len);
         nameW[len] = 'W';
-        nameR[len + 1] = 0;
+        nameW[len + 1] = 0;
         uint64_t semWrite = semOpen(nameW, BUFFER_SIZE);
         if (semRead == -1 || semWrite == -1)
         {
@@ -226,7 +228,7 @@ static uint64_t findAvailableSpace()
 
 static uint64_t indexValid(uint64_t pipeIndex)
 {
-    return ((pipeIndex < 0 || pipeIndex > MAX_PIPES) && pipes[pipeIndex - 1].available == FALSE) ? 0 : 1;
+    return ((pipeIndex == 0 || pipeIndex > MAX_PIPES) && pipes[pipeIndex - 1].available == FALSE) ? 0 : 1;
 }
 
 void pipe()

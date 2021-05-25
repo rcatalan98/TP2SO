@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /**
  * shell.c: Intérprete de comandos de funciones de kernel.
 */
@@ -135,9 +137,8 @@ int processInput(char *inputBuffer)
                         print("Error createProcess\n");
                     fd[0] = 0;
                     fd[1] = pipeId;
-                    int pid2;
                     aux[0] = commands[secondCommand].name;
-                    if ((pid2 = _createProcess(commands[secondCommand].command, 1, aux, FOREGROUND, fd)) == 0)
+                    if ((_createProcess(commands[secondCommand].command, 1, aux, FOREGROUND, fd)) == 0)
                     print("Error createProcess\n");
                     _kill(pid1);
                     _pipeClose(pipeId);

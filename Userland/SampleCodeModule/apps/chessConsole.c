@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /**
  * chessConsole.c: Driver consola 
 */
@@ -41,7 +43,7 @@ void printLogLine(char *move, int player)
 }
 void printPlayer(int number, int line)
 {
-    char *aux;
+    char *aux = NULL;
     switch (number)
     {
     case PLAYER1:

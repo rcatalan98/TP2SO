@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /**
  *  kernel.c: Archivo original de barebones. Se limpia lo no utilizado de modo texto.
  */

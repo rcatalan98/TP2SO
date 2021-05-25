@@ -61,3 +61,22 @@ Dispone de las siguientes funcionalidades:
   - Rotación: ```r``` para rotar 90° la posición de las piezas y tablero de ajedrez.
   - Salida: ```Esc``` la tecla de escape permite salir del juego con la habilidad de resumir la partida ingresando ```chess -c``` desde la terminal.
 - Luego de realizar una jugada válida, la misma se imprimirá en pantalla, a modo de log, como jugada exitosa y luego se cambiara de turno reiniciando el contador. Se puede recrear la partida si se lo desea con las jugadas existentes del log.
+
+## Testeo
+
+Para el testeo con tanto **PVS-Studio** y **Cppcheck** se debe primero instalar **PVS-Studio** de no tenerlo, de la siguiente manera en su contenedor de *docker*.
+```bash
+apt-get update
+apt-get install pvs-studio
+pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
+```
+Luego correr el siguiente comando:
+```bash
+ make test
+```
+Los resultados se encontrarán de la siguiente manera:
+
+ - **PVS-Studio:** report.tasks
+ - **Cppcheck:** cppoutput.cppOut
+
+Para remover los mismos, correr el comando `make cleanTest` en el mismo directorio donde fue realizada la compilación.

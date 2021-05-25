@@ -1,6 +1,8 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/scheduler.h"
 #include "../include/stdio.h" // Para debugging.
-#define STACK_SIZE 4 * 1024
+#define STACK_SIZE (4 * 1024)
 #define PROCESS_SIZE (8 * 1024 - sizeof(proccessNode)) // 8 KB
 #define FIRST_PID 1
 #define MAX_REGISTER_SIZE 16
@@ -142,7 +144,7 @@ static processNode *findNextReady(struct processList *list)
             // Hacemos el free del proceso.
             freeProcess(toReturn);
         }
-        else if (toReturn->pcb.state == BLOCKED)
+        else
             addProcess(toReturn, list);
         toReturn = removeProcess(list);
     }
@@ -473,6 +475,9 @@ uint64_t nice(uint64_t pid, uint64_t newPriority)
     else
     {
         processNode *node = getProcess(pid);
+        if(node == NULL){
+            return -1;
+        }
         node->pcb.priority = newPriority;
     }
     return 0;

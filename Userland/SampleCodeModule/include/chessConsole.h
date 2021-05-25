@@ -8,9 +8,9 @@
 #include <stdlib.h>
 
 #define MAX_WIDTH 300
-#define PLAYER_LENGTH 7 * CHAR_WIDTH
-#define THRESHOLD (MAX_WIDTH - PLAYER_LENGTH) / CHAR_WIDTH
-#define LAST_LINE 48-1 // Trae errores de compilacion de scope si se modifica llamando por syscall al tamaño actual. 
+#define PLAYER_LENGTH (7 * CHAR_WIDTH)
+#define THRESHOLD ((MAX_WIDTH - PLAYER_LENGTH) / CHAR_WIDTH)
+#define LAST_LINE (48-1) // Trae errores de compilacion de scope si se modifica llamando por syscall al tamaño actual. 
 
 void initializeCursor();
 void printIn(char *string, int x, int y, int color);

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/semaphore.h"
 typedef struct
 {
@@ -7,7 +9,7 @@ typedef struct
 static space semSpaces[MAX_SEM];
 
 // Funciones internas
-static uint64_t createSem(char *name, uint64_t initValue);
+static int createSem(char *name, uint64_t initValue);
 static uint64_t findAvailableSpace();
 static uint64_t lockSem; // Para bloquear al momento de un open o close de cualquier sem.
 static uint64_t findSem(char *name);
@@ -39,9 +41,9 @@ static uint64_t findAvailableSpace()
 }
 
 // Retorna la posicion dentro de la estructura donde esta guardado
-static uint64_t createSem(char *name, uint64_t initValue)
+static int createSem(char *name, uint64_t initValue)
 {
-    uint64_t pos;
+    int pos;
     if ((pos = findAvailableSpace()) != -1)
     {
         // Inicializamos la estructura
@@ -97,7 +99,7 @@ uint64_t semClose(char *name)
 // Retorna 0 en caso de exito y -1 si fracasa. Blockea el sem.
 uint64_t semWait(uint64_t semIndex)
 {
-    if (semIndex < 0 || semIndex >= MAX_SEM)
+    if (semIndex >= MAX_SEM)
         return -1;
     sem_t *sem = &semSpaces[semIndex].sem;
 
@@ -131,20 +133,16 @@ uint64_t semWait(uint64_t semIndex)
 
 uint64_t semPost(uint64_t semIndex)
 {
-    if (semIndex < 0 || semIndex >= MAX_SEM)
+    if (semIndex >= MAX_SEM)
     {
         return -1;
     }
 
     sem_t *sem = &semSpaces[semIndex].sem;
-    if (sem == NULL)
-    {
-        return -1;
-    }
     while (_xchg(&sem->lock, 1) != 0)
         ;
     sem->value++;
-    int pid;
+    int pid = 0;
     if (sem->sizeList > 0)
     {
         if ((pid = dequeueProcess(sem)) == -1)
@@ -215,10 +213,10 @@ uint64_t dequeueProcess(sem_t *sem)
 void sem()
 {
     print("SEM'S NAME\t\tSTATE\t\tBLOCKED PROCESSES\n");
-    for(int i = 0; i < MAX_SEM; i++)
+    for (int i = 0; i < MAX_SEM; i++)
     {
         int toPrint = !(semSpaces[i].available);
-        if(toPrint)
+        if (toPrint)
         {
             printSem(semSpaces[i].sem);
         }
@@ -228,9 +226,9 @@ void sem()
 void printSem(sem_t sem)
 {
     print(sem.name);
-    if(strlen(sem.name) > 10)
+    if (strlen(sem.name) > 10)
         print("\t\t");
-    else 
+    else
         print("\t\t\t\t");
     printInt(sem.value);
     print("\t\t\t");
@@ -240,7 +238,7 @@ void printSem(sem_t sem)
 
 void printProcessesBlocked(process_t *process)
 {
-    while(process != NULL)
+    while (process != NULL)
     {
         printInt(process->pid);
         print(" ");
@@ -251,7 +249,7 @@ void printProcessesBlocked(process_t *process)
 
 char *getSemName(uint64_t semIndex)
 {
-    if(semIndex > MAX_SEM || semIndex < 0)
+    if (semIndex >= MAX_SEM)
     {
         print("Wrong Index in getSemName\n");
         return NULL;
@@ -261,12 +259,11 @@ char *getSemName(uint64_t semIndex)
 
 void printProcessesSem(uint64_t semIndex)
 {
-    if(semIndex > MAX_SEM || semIndex < 0)
+    if (semIndex >= MAX_SEM)
     {
         print("Wrong Index in printProcessesSem\n");
-        return ;
+        return;
     }
     sem_t sem = semSpaces[semIndex].sem;
     printProcessesBlocked(sem.firstProcess);
 }
-

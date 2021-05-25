@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /**
  * Driver de teclado, llamado del metodo getKey() desde syscall 4.
 */
@@ -33,11 +35,10 @@ int initializeKeyboard()
 }
 int keyboard_handler()
 {
-    int scanCode;
 
     while (keyboardActivated())
     {
-        scanCode = getKeyboardScancode();
+        int scanCode = getKeyboardScancode();
         if (scanCode == SHIFT1 || scanCode == SHIFT2)
             shift = 1;
         else if (scanCode == SHIFT1_FREE || scanCode == SHIFT2_FREE)
@@ -50,7 +51,7 @@ int keyboard_handler()
             killFg();
             return 1;
         }
-        if (scanCode >= 0 && scanCode < KEYS && pressCodes[scanCode][0] != 0)
+        if (scanCode < KEYS && pressCodes[scanCode][0] != 0)
         {
             char c = keyToAscii(scanCode);
             int fdOut = getFdOut();
@@ -71,7 +72,7 @@ int keyboard_handler()
 
 void putInBuffer(char c)
 {
-    if (bsize <= MAX_SIZE)
+    if (bsize < MAX_SIZE)
     {
         keyBuffer[bsize++] = c;
     }
@@ -99,19 +100,15 @@ char sGetChar()
 }
 
 static char getCharK(){
-    if (bsize <= 0)
+    if (bsize == 0)
     {
         return 0;
     }
     char key = keyBuffer[0];
-    if (bsize > 0)
-    {
-        // removemos el primero.
         for (int i = 1; i < bsize; i++)
         {
             keyBuffer[i - 1] = keyBuffer[i];
         }
-    }
     bsize--;
     return key;
 }
