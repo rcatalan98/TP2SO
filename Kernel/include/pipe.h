@@ -14,4 +14,5 @@ uint64_t pipeOpen(char *name);
 uint64_t pipeClose(uint64_t pipeIndex);
 uint64_t writePipe(uint64_t pipeIndex, char *string);
 char readPipe(uint64_t pipeIndex);
+void pipe();
 #endif

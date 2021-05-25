@@ -11,7 +11,10 @@
 
 # Manual de Usuario
 Sistema operativo básico basado en Barebonesx64 por RowDaBoat. Para poder correr el sistema se debe tener instalado qemu-system a fin de visualizar y docker instalado para el compilado con el contenedor `agodio/itba-so:1.0` dado por la cátedra. Al tener dichos requisitos se debe compilar desde docker y luego ejecutar usando:
-1. La primera vez que se accede ```cd Toolchain``` y luego ```make all```. Este paso solo se debe realizar la primera vez que se descarga el repositorio.
+1. La primera vez que se accede ```cd Toolchain``` y luego ```make all```. Este paso solo se debe realizar la primera vez que se descarga el repositorio. Además, se puede pasar un parametro para determinar el memory manager que se utilizara de la siguiente forma: 
+- `make MM=BUDDY_MM all` (para utilizar el buddy).
+- `make MM=FREELIST_MM all` (para utilizar free list).
+De no funcionar, se puede cambiar la variable `MM` por la deseada dentro del `makefile` de `kernel`. 
 2. Ahora resta una úntima compilación del proyecto volviendo al directorio anterior y utilizando ```make all```.
 3. Por último resta correr el sistema utilizando qemu con el comando ```run.sh```.
 
@@ -26,6 +29,27 @@ Dispone de las siguientes funcionalidades:
 - **invalidZeroDivisionException**: Verifica el funcionamiento correcto de la excepción de tipo división por cero.
 - **chess**: Despliega juego de ajedrez en formato gráfico humano a humano. Al escribir ```chess -man``` se despliega un menú con las reglas del juego. Además, se dispone de una opción para continuar una partida existente usando ```chess -c```. 
 - **clear**: Limpia la pantalla de los comandos ingresados.
+- ***ps:*** Despliega el estado de los procesos.
+- ***loop:*** Crea un proceso el cual itera sobre si mismo.
+- ***kill:*** Elimina el proceso cuyo pid es el recibido como argumento de entrada.
+- ***nice:*** Cambia la prioridad del proceso cuyo pid es el recibido como argumento de entrada.
+- ***block:*** Bloquea el proceso cuyo pid es el recibido como argumento de entrada.
+- ***unblock:*** Desbloquea el proceso cuyo pid es el recibido como argumento de entrada.
+- ***mem:*** Imprime el estado de la memoria del memory manager por bloques.
+- ***test_processes:*** Prueba la creacion de procesos con el scheduler (archivo dado por la cátedra).
+- ***test_prio:*** Prueba la prioridad del scheduler (archivo dado por la cátedra).
+- ***test_sync:*** Prueba la sincronizacion de semaforos (archivo dado por la cátedra).
+- ***test_no_sync:*** Prueba la sincronizacion sin el uso de semaforos (archivo dado por la cátedra).
+- ***test_mm:*** Prueba el manejo de memoria del memory manager (archivo dado por la cátedra).
+- ***pipe:*** Despliega información sobre de los pipes activos.
+- ***sem:*** Despliega información sobre de los semaforos activos.
+- ***wc:*** Cuenta las lineas recibidas como argumento de entrada.
+- ***filter:*** Filtra las vocales recibidas como argumento de entrada.
+- ***cat:*** Imprime en pantalla los caracteres recibidos como argumento de entrada.
+- ***phylo:*** Dilema de los filosofos comiendo, inicia con 5 filosofos, más indiaciones son dadas al ejecutarlo.
+
+## Shortcuts
+- ***Shift + Caps Lock***: Permite ceder el estado foreground al siguiente proceso.
 
 ## Chess
 ¡Juegue una nueva partida o reanude su partida existente de ajedrez en formato gráfico por comando de línea! 
@@ -37,19 +61,3 @@ Dispone de las siguientes funcionalidades:
   - Rotación: ```r``` para rotar 90° la posición de las piezas y tablero de ajedrez.
   - Salida: ```Esc``` la tecla de escape permite salir del juego con la habilidad de resumir la partida ingresando ```chess -c``` desde la terminal.
 - Luego de realizar una jugada válida, la misma se imprimirá en pantalla, a modo de log, como jugada exitosa y luego se cambiara de turno reiniciando el contador. Se puede recrear la partida si se lo desea con las jugadas existentes del log.
-
-## Syscalls
-
-***int 80h***
-
-| %rdi | System Call           | %rsi              | %rdx              | %rcx              | %r8                 | %r9    |
-| ---- | --------------------  | ----------------- | ----------------- | ----------------- | ------------------- | -----  |
-| 0    | void timerFunc        | void (*f)         | int toDo          |                   |                     |        |
-| 1    | uint8_t getTime       | int descriptor    |                   |                   |                     |        |
-| 2    | void drawFigure       | char *toDraw      | int color         | int size          | int x               |        |
-| 3    | uint64_t sWrite       | char * string     | uint8_t length    | t_colour bgColour | t_colour fontColour | int y  |
-| 4    | char sGetChar         |                   |                   |                   |                     |        |
-| 5    | void setCursor        | unsigned int x    | unsigned int y    | int color         |                     |        |
-| 6    | void clearScreen      |                   |                   |                   |                     |        |
-| 7    | void getPixelWidth()  |                   |                   |                   |                     |        |
-| 8    | void getPixelWidth()  |                   |                   |                   |                     |        |

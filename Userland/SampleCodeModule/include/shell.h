@@ -86,6 +86,10 @@ extern uint64_t _writePipe(uint64_t pipeIndex, char *string);
 
 extern char _readPipe(uint64_t pipeIndex);
 
+extern void _sem();
+
+extern void _pipe();
+
 extern void getRegs(int argcount, char *args[]);
 
 /**

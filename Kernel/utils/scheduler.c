@@ -416,8 +416,7 @@ void ps()
         print("There are no processes to show\n");
         return;
     }
-    //print("PID      PRIORITY     RSP        RBP        FOREGROUND    STATE      NAME\n");
-    print("PID\t\t\tPRIORITY\t\tRSP\t\tRBP\t\tFOREGROUND\t\t\tSTATE\tNAME\n");
+    print("PID\t\t\tPRIORITY\t\tRSP\t\tRBP\t\tFOREGROUND\t\tSTATE\tNAME\n");
     while (aux != NULL)
     {
         printProcess(aux);

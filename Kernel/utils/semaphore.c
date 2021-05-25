@@ -13,6 +13,8 @@ static uint64_t lockSem; // Para bloquear al momento de un open o close de cualq
 static uint64_t findSem(char *name);
 static uint64_t enqeueProcess(uint64_t pid, sem_t *sem);
 static uint64_t dequeueProcess(sem_t *sem);
+void printSem(sem_t sem);
+void printProcessesBlocked(process_t *process);
 
 // Se inicializa el vector para que todos los lugares esten disponibles
 void initSems()
@@ -101,22 +103,10 @@ uint64_t semWait(uint64_t semIndex)
 
     while (_xchg(&sem->lock, 1) != 0)
         ;
-    // print("name sem: ");
-    // print(sem->name);
-    // print("\n");
-    // print("Value: ");
-    // printInt(sem->value);
-    // print("\n");
 
     if (sem->value > 0)
     {
-        // print("Antes Value: ");
-        // printInt(sem->value);
-        // print("\n");
         sem->value--;
-        // print("Despues Value: ");
-        // printInt(sem->value);
-        // print("\n");
         _xchg(&sem->lock, 0);
     }
     else
@@ -131,13 +121,10 @@ uint64_t semWait(uint64_t semIndex)
         }
 
         _xchg(&sem->lock, 0);
-        //print("Antes del block\n");
         if (block(pid) == -1)
         {
-            // print("Error en el block");
             return -1;
         }
-        //print("Despues del block\n");
         sem->value--;
     }
     return 0;
@@ -147,14 +134,12 @@ uint64_t semPost(uint64_t semIndex)
 {
     if (semIndex < 0 || semIndex >= MAX_SEM)
     {
-        // print("Error index menor a 0 o mayor a max_sem\n");
         return -1;
     }
 
     sem_t *sem = &semSpaces[semIndex].sem;
     if (sem == NULL)
     {
-        // print("Error sem es NULL\n");
         return -1;
     }
     while (_xchg(&sem->lock, 1) != 0)
@@ -165,7 +150,6 @@ uint64_t semPost(uint64_t semIndex)
     {
         if ((pid = dequeueProcess(sem)) == -1)
         {
-            // print("Error al sacar de la lista un proceso\n ");
             _xchg(&sem->lock, 0);
             return -1;
         }
@@ -234,3 +218,62 @@ uint64_t dequeueProcess(sem_t *sem)
     sem->sizeList--;
     return pid;
 }
+
+void sem()
+{
+    print("SEM'S NAME\t\tSTATE\t\tBLOQUED PROCESSES\n");
+    for(int i = 0; i < MAX_SEM; i++)
+    {
+        int toPrint = !(semSpaces[i].available);
+        if(toPrint)
+        {
+            printSem(semSpaces[i].sem);
+        }
+    }
+}
+
+void printSem(sem_t sem)
+{
+    print(sem.name);
+    if(strlen(sem.name) > 10)
+        print("\t\t");
+    else 
+        print("\t\t\t\t");
+    printInt(sem.value);
+    print("\t\t\t");
+    printProcessesBlocked(sem.firstProcess);
+    print("\n");
+}
+
+void printProcessesBlocked(process_t *process)
+{
+    while(process != NULL)
+    {
+        printInt(process->pid);
+        print("-");
+        process = process->next;
+    }
+    print("-");
+}
+
+char *getSemName(uint64_t semIndex)
+{
+    if(semIndex > MAX_SEM || semIndex < 0)
+    {
+        print("Wrong Index in getSemName\n");
+        return NULL;
+    }
+    return semSpaces[semIndex].sem.name;
+}
+
+void printProcessesSem(uint64_t semIndex)
+{
+    if(semIndex > MAX_SEM || semIndex < 0)
+    {
+        print("Wrong Index in printProcessesSem\n");
+        return ;
+    }
+    sem_t sem = semSpaces[semIndex].sem;
+    printProcessesBlocked(sem.firstProcess);
+}
+

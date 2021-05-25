@@ -28,4 +28,8 @@ uint64_t semClose(char *name);
 uint64_t semWait(uint64_t semIndex);
 // the value of the semaphore is incremented, and all threads which are waiting on the semaphore are awakened. If successful, sem_post() will return 0.  Otherwise, -1 is returned.
 uint64_t semPost(uint64_t semIndex);
+void sem();
+char *getSemName(uint64_t semIndex);
+void printProcessesSem(uint64_t semIndex);
+
 #endif

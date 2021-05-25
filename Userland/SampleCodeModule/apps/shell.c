@@ -16,6 +16,7 @@ void cat(int argSize, char *args[]);
 void wc(int argSize, char *args[]);
 void filter(int argSize, char *args[]);
 static int isVowel(char c);
+int isValidCommand(char *command);
 
 void intializeShell()
 {
@@ -55,6 +56,8 @@ void loadCommands()
     loadCommand((void *)&wc, "wc", "Prints word count of the entered text.\n", FALSE);
     loadCommand(&filter, "filter", "Filters the vowels of the entered text.\n", FALSE);
     loadCommand(&phylo, "phylo", "Play the philosophers dilema.\n", FALSE);
+    loadCommand(&_sem, "sem", "Prints semaphores' list.\n", TRUE);
+    loadCommand(&_pipe, "pipe", "Prints pipes information.\n", TRUE);
     loadCommand(&test_mm, "test_mm", "Function to test the memory manager.\n", FALSE);
     loadCommand(&test_prio, "test_prio", "Function to test the priority scheduler.\n", FALSE);
     loadCommand(&test_processes, "test_processes", "Function to test the creation of processes.\n", FALSE);
@@ -112,17 +115,25 @@ int processInput(char *inputBuffer)
         {
             if (!commands[i].builtIn)
             {
+                int secondCommand;
                 context cxt = FOREGROUND;
                 if (argSize == 2 && args[1][0] == '&')
                 {
                     cxt = BACKGROUND;
                     // print("background\n");
                 }
-                if (argSize == 3 && args[1][0] == '|')
+                if (argSize == 3 && args[1][0] == '|' && (secondCommand = isValidCommand(args[2])) >= 0)
                 {
-                    //crear proceso wc y cat con fd correspondientes
+
+                    // crear proceso wc y cat con fd correspondientes
+                    print("Primer argumento: ");
+                    print(args[0]);
+                    print("\n");
+                    print("Segundo argumento: ");
+                    print(commands[secondCommand].name);
+                    print("\n");
                     print("Entramos");
-                    int pipeId = _pipeOpen("cat&wc");
+                    int pipeId = _pipeOpen("|");
                     if (pipeId == -1)
                     {
                         print("Error pipeOpen");
@@ -131,21 +142,24 @@ int processInput(char *inputBuffer)
                     printInt(pipeId);
                     print("\n");
                     int fd[2] = {pipeId, 0};
-                    char *aux[1] = {"filter"};
-                    int pid;
-                    if ((pid = _createProcess(&filter, 1, aux, BACKGROUND, fd)) == 0)
+                    int pid1;
+                    char *aux[] = {commands[i].name};
+                    if ((pid1 = _createProcess(commands[i].command, 1, aux, BACKGROUND, fd)) == 0)
                         print("Error createProcess\n");
-                    print("Se creo el pid ");
-                    printInt(pid);
-                    print("\n");
-                    aux[0] = "cat";
+                    // print("Se creo el pid ");
+                    // printInt(pid);
+                    // print("\n");
                     fd[0] = 0;
                     fd[1] = pipeId;
-                    if ((pid = _createProcess(&cat, 1, aux, FOREGROUND, fd)) == 0)
+                    int pid2;
+                    aux[0] = commands[secondCommand].name;
+                    if ((pid2 = _createProcess(commands[secondCommand].command, 1, aux, FOREGROUND, fd)) == 0)
                         print("Error createProcess\n");
-                    print("Se creo el pid ");
-                    printInt(pid);
-                    print("\n");
+                    _kill(pid1);
+                    _pipeClose(pipeId);
+                    //     print("Se creo el pid ");
+                    //     printInt(pid);
+                    //     print("\n");
                 }
                 else
                 {
@@ -247,7 +261,7 @@ void printmem(int argSize, char *args[])
     putChar('\n');
 }
 
-// source: https://www.felixcloutier.com/x86/ud.
+// Source: https://www.felixcloutier.com/x86/ud.
 void invalidOpCodeException()
 {
     __asm__("ud2");
@@ -255,7 +269,7 @@ void invalidOpCodeException()
 
 void invalidZeroDivisionException()
 {
-    int a = 0, b = (1 / a); // dividimos por 0.
+    int a = 0, b = (1 / a); // Dividimos por 0.
     if (b)
     {
     }
@@ -390,4 +404,16 @@ static int isVowel(char c)
             c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U')
                ? 1
                : 0;
+}
+
+int isValidCommand(char *command)
+{
+    for (int i = 0; i < sizeC; i++)
+    {
+        if (strcmp(command, commands[i].name) == 1)
+        {
+            return i;
+        }
+    }
+    return -1;
 }

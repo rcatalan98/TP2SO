@@ -98,13 +98,25 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         // uint64_t semOpen(char *name, uint64_t initValue);
         return semOpen((char *)rsi, (uint64_t)rdx);
     case 25:
+        // uint64_t pipeOpen(char *name);
         return pipeOpen((char *)rsi);
     case 26:
+        // uint64_t pipeClose(uint64_t pipeIndex);
         return pipeClose((uint64_t)rsi);
     case 27:
+        // char readPipe(uint64_t pipeIndex);
         return readPipe((uint64_t)rsi);
     case 28:
+        // uint64_t writePipe(uint64_t pipeIndex, char *string);
         return writePipe((uint64_t)rsi, (char *)rdx);
+    case 29:
+        // void sem();
+        sem();
+        return 1;
+    case 30:
+        // void pipe();
+        pipe();
+        return 1;
     default:
         break;
     }

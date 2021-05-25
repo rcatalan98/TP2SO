@@ -71,7 +71,7 @@ void *mallocFF(uint32_t size)
 
 void freeFF(void *ap)
 {
-    if (ap == NULL)
+    if (ap == NULL) // || (uint64_t)ap % HEADER_SIZE
         return;
     list_t *list = (list_t *)ap - 1;
     list->occupied = 0;

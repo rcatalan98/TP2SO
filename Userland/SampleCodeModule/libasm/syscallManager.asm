@@ -31,6 +31,9 @@ GLOBAL _pipeOpen
 GLOBAL _pipeClose
 GLOBAL _readPipe
 GLOBAL _writePipe
+GLOBAL _sem
+GLOBAL _pipe
+
 SECTION .text
 
 
@@ -142,3 +145,7 @@ _readPipe:
 	syscall 27
 _writePipe:
 	syscall 28
+_sem:
+	syscall 29
+_pipe:
+	syscall 30
