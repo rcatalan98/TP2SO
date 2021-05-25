@@ -120,46 +120,27 @@ int processInput(char *inputBuffer)
                 if (argSize == 2 && args[1][0] == '&')
                 {
                     cxt = BACKGROUND;
-                    // print("background\n");
                 }
                 if (argSize == 3 && args[1][0] == '|' && (secondCommand = isValidCommand(args[2])) >= 0)
                 {
-
-                    // crear proceso wc y cat con fd correspondientes
-                    print("Primer argumento: ");
-                    print(args[0]);
-                    print("\n");
-                    print("Segundo argumento: ");
-                    print(commands[secondCommand].name);
-                    print("\n");
-                    print("Entramos");
                     int pipeId = _pipeOpen("|");
                     if (pipeId == -1)
                     {
                         print("Error pipeOpen");
                     }
-                    print("Se creo el pipe ");
-                    printInt(pipeId);
-                    print("\n");
                     int fd[2] = {pipeId, 0};
                     int pid1;
                     char *aux[] = {commands[i].name};
                     if ((pid1 = _createProcess(commands[i].command, 1, aux, BACKGROUND, fd)) == 0)
                         print("Error createProcess\n");
-                    // print("Se creo el pid ");
-                    // printInt(pid);
-                    // print("\n");
                     fd[0] = 0;
                     fd[1] = pipeId;
                     int pid2;
                     aux[0] = commands[secondCommand].name;
                     if ((pid2 = _createProcess(commands[secondCommand].command, 1, aux, FOREGROUND, fd)) == 0)
-                        print("Error createProcess\n");
+                    print("Error createProcess\n");
                     _kill(pid1);
                     _pipeClose(pipeId);
-                    //     print("Se creo el pid ");
-                    //     printInt(pid);
-                    //     print("\n");
                 }
                 else
                 {
@@ -206,7 +187,6 @@ void help()
         printWithColor(commands[i].name, YELLOW);
         print(": ");
         print(commands[i].description);
-        // putChar('\n');
     }
 }
 
@@ -377,14 +357,13 @@ void wc(int argSize, char *args[])
     while ((c = getChar()) != 0)
     {
         if (c == '\n')
+        {
             lines++;
-        print("Amount of lines: ");
-        printInt(lines);
-        print("\n");
+            print("Amount of lines: ");
+            printInt(lines);
+            print("\n");
+        }
     }
-    print("Amount of lines: ");
-    printInt(lines);
-    print("\n");
 }
 
 void filter(int argSize, char *args[])

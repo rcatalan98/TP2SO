@@ -32,7 +32,6 @@ void printProcesses(pipe_t pipe);
 // Retorna -1 en caso de error y 0 en caso contrario.
 uint64_t initPipes()
 {
-    print("init pipes");
     if ((semPipeManager = semOpen("Pipe Manager", 1)) == -1)
     {
         print("Error en initPipe");
@@ -180,7 +179,7 @@ static uint64_t createPipe(char *name)
     int len = strlen(name);
     if (len <= 0 || len >= MAX_NAME)
     {
-        print("Creando el pipe: Nombre demasiado largo\n");
+        print("createPipe: Nombre demasiado largo\n");
         return -1;
     }
     uint64_t pos;

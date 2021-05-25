@@ -88,7 +88,7 @@ uint64_t semClose(char *name)
     {
         return -1; // No se encontro el semaforo pedido.
     }
-    if ((semSpaces[semIndex].sem.size--) <= 0)
+    if ((--semSpaces[semIndex].sem.size) <= 0)
         semSpaces[semIndex].available = TRUE;
     _xchg(&lockSem, 0);
     return 1;
@@ -116,7 +116,6 @@ uint64_t semWait(uint64_t semIndex)
         if (enqeueProcess(pid, sem) == -1)
         {
             _xchg(&sem->lock, 0);
-            // print("Error enqeue");
             return -1;
         }
 
@@ -153,12 +152,6 @@ uint64_t semPost(uint64_t semIndex)
             _xchg(&sem->lock, 0);
             return -1;
         }
-        // unblock(pid);
-        // int unblockValue = unblock(pid);
-        // if (unblockValue != -1)
-        // {
-        //     forceTimer();
-        // }
     }
     _xchg(&sem->lock, 0);
     unblock(pid) ?: forceTimer();
@@ -221,7 +214,7 @@ uint64_t dequeueProcess(sem_t *sem)
 
 void sem()
 {
-    print("SEM'S NAME\t\tSTATE\t\tBLOQUED PROCESSES\n");
+    print("SEM'S NAME\t\tSTATE\t\tBLOCKED PROCESSES\n");
     for(int i = 0; i < MAX_SEM; i++)
     {
         int toPrint = !(semSpaces[i].available);
@@ -250,7 +243,7 @@ void printProcessesBlocked(process_t *process)
     while(process != NULL)
     {
         printInt(process->pid);
-        print("-");
+        print(" ");
         process = process->next;
     }
     print("-");
