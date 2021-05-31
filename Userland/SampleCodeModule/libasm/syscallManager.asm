@@ -33,6 +33,7 @@ GLOBAL _readPipe
 GLOBAL _writePipe
 GLOBAL _sem
 GLOBAL _pipe
+GLOBA _waitChildren(
 
 SECTION .text
 
@@ -149,3 +150,5 @@ _sem:
 	syscall 29
 _pipe:
 	syscall 30
+_waitChildren:
+	syscall 31

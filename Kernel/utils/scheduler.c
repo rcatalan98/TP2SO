@@ -51,6 +51,10 @@ typedef struct pcb_t
     context context; // 1 -> FOREGROUND, 0 -> BACKGROUND
     uint64_t fdIn;
     uint64_t fdOut;
+    uint64_t children[10];
+    uint64_t waiting[10];
+    int waitingIndex;
+    int indexChild;
 } pcb_t;
 typedef struct processNode
 {
@@ -196,6 +200,9 @@ static uint64_t initializeProcess(processNode *node, char *name, context cxt, in
     pcb_t *pcb = &(node->pcb);
     pcb->pid = getNewPid();
     pcb->ppid = currentProcess == NULL ? 0 : currentProcess->pcb.pid;
+    if (pcb->ppid != 0)
+        currentProcess->pcb.children[currentProcess->pcb.indexChild++] = pcb->pid; //se guarda el pid del hijo nuevo.
+    pcb->indexChild = 0;
     memcpy(pcb->name, name, strlen(name));
     pcb->rbp = (uint64_t)node + STACK_SIZE + sizeof(processNode) - sizeof(char *);
     pcb->rsp = (uint64_t)(pcb->rbp - sizeof(stackFrame));
@@ -203,6 +210,7 @@ static uint64_t initializeProcess(processNode *node, char *name, context cxt, in
     pcb->priority = INIT_PRIORITY;
     pcb->tickets = INIT_PRIORITY * QUANTUM;
     pcb->context = cxt;
+
     if (fd == NULL)
     {
         pcb->fdIn = 0;
@@ -340,12 +348,31 @@ static void exitProcess()
     kill(currentProcess->pcb.pid);
 }
 
+uint64_t killChildren()
+{
+    for (int i = 0; i < currentProcess->pcb.indexChild; i++)
+    {
+        int pidChild = currentProcess->pcb.children[i];
+        if (pidChild > 0)
+        {
+            kill(pidChild);
+        }
+    }
+}
 // Retorna 0 en caso de exito, -1 si existe algun tipo de error tal como en linux.
 uint64_t kill(uint64_t pid)
-{  
+{
     uint16_t done = changeState(pid, KILLED);
+
     if (pid == currentProcess->pcb.pid)
+    {
+        if (currentProcess->pcb.indexChild != 0)
+        {
+            killChildren();
+        }
         forceTimer();
+    }
+
     return done;
 }
 
@@ -435,11 +462,12 @@ uint16_t changeState(uint64_t pid, states newState)
             return 1;
         if (currentProcess->pcb.state != READY && newState == READY)
             currentList.nReady++;
-        else if (currentProcess->pcb.state == READY && newState != READY){
+        else if (currentProcess->pcb.state == READY && newState != READY)
+        {
             if (newState == KILLED && currentProcess->pcb.context == FOREGROUND && currentProcess->pcb.ppid > 0)
                 unblock(currentProcess->pcb.ppid);
             currentList.nReady--;
-            }
+        }
         currentProcess->pcb.state = newState;
         return 0;
     }
@@ -475,7 +503,8 @@ uint64_t nice(uint64_t pid, uint64_t newPriority)
     else
     {
         processNode *node = getProcess(pid);
-        if(node == NULL){
+        if (node == NULL)
+        {
             return -1;
         }
         node->pcb.priority = newPriority;
@@ -515,4 +544,18 @@ uint64_t killFg()
         return kill(currentProcess->pcb.pid);
     }
     return searchForForegroundKill();
+}
+
+void waitPid(int pid)
+{
+    // wait
+    currentProcess->pcb.waiting[currentProcess->pcb.waitingIndex++] = pid;
+}
+
+void waitChildren()
+{
+    for (int i = 0; i < currentProcess->pcb.indexChild; i++)
+    {
+        waitPid(currentProcess->pcb.children[i]);
+    }
 }

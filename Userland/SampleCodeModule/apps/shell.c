@@ -397,3 +397,4 @@ int isValidCommand(char *command)
     }
     return -1;
 }
+

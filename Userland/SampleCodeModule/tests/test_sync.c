@@ -33,7 +33,7 @@ void slowInc(int64_t *p, int64_t inc)
   // if (aux < 0)
   // {
   //   print("-");
-  //   printInt(aux * (-1));
+  // L  printInt(aux * (-1));
   // }
   // else
   // {
@@ -161,4 +161,8 @@ void test_no_sync()
     _createProcess(&inc, 4, argv1, 0, NULL);
     _createProcess(&inc, 4, argv2, 0, NULL);
   }
+}
+
+int waitChildren(){
+  _waitChildren();
 }

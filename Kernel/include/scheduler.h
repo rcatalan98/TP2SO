@@ -27,4 +27,5 @@ void yield();
 uint64_t getFdIn();  // fdIn del current
 uint64_t getFdOut(); // fdOut del current
 uint64_t killFg();
+void waitChildren();
 #endif
